@@ -1,0 +1,58 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@model AuthApp.ViewModels.ChatMessageModel
+
+@{
+}
+<h1>@ViewBag.Chat</h1>
+
+<form class="input" asp-action="send" asp-controller="Chat">
+    @ViewBag.Nickname
+
+    <input type="hidden" asp-for="ChatName" value=@ViewBag.Chat />
+    <input type="hidden" asp-for="TimeOfPosting" />
+    <input type="text" asp-for="Message" />
+
+    <input type="submit" value="Отправить" />
+</form>
+
+<form class="ChatMessage">
+    <div>
+        @{int i = 0;}
+        @foreach (var user in ViewBag.ListOfUsers)
+        {
+        <div>
+            @ViewBag.ListOfUsers[i];
+            @ViewBag.ListOfDates[i];
+            @ViewBag.ListOfTexts[i];
+        </div>
+            i++;
+        }
+
+    </div>
+</form>
+
+
+<style type="text/css">
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    .ChatMessage {
+        height: 500px;
+        width: 100%;
+        border: solid;
+        border-color: dimgrey;
+    }
+
+    .input {
+        width: 100%;
+        border: solid;
+        border-color: dimgrey;
+    }
+</style>
+
+

@@ -1,0 +1,30 @@
+﻿@model AuthApp.ViewModels.LoginModel
+
+
+<font style="color: deepskyblue; font-size: 12px; font-family: Arial">
+    <h2>Вход на сайт</h2>
+</font>
+
+
+<form asp-action="Login" asp-controller="Account" asp-anti-forgery="true" class="mb-3">
+    <div class="validation" asp-validation-summary="ModelOnly"></div>
+    <div>
+            <label asp-for="Email">Введите Email</label>
+            <input type="text" asp-for="Email" />
+            <span asp-validation-for="Email" />
+    </div>
+    <div>
+            <label asp-for="Password">Введите пароль</label>
+            <input asp-for="Password" />
+            <span asp-validation-for="Password" />
+    </div>
+    <div>
+            <input type="submit" value="Войти" class="btn btn-outline-dark" />
+    </div>
+</form>
+
+<form asp-action="Register" asp-controller="Account" asp-anti-forgery="true">
+    <div>
+    <input type="submit" value="Регистрация" class="btn btn-outline-dark" />
+    </div>
+</form>
