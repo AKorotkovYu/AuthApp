@@ -22,15 +22,13 @@ namespace AuthApp.Controllers
         }
 
         [Authorize]
-        public IActionResult Index()
+        public IActionResult Index(string nickname)
         {
             List<string> chats = new();
             foreach(Chat chat in db.Chats)
             {
                 chats.Add(chat.ChatName);
             }
-            
-            ViewBag.ListOfChats = chats;
             return View(chats);
         }
 

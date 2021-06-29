@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-
+@model List<string> 
 
 <div class="text-center">
     <h1 class="display-3">Welcome @ViewBag.Nickname</h1>
@@ -11,11 +11,10 @@
 Список Чатов
 
 <div style="width:90%">
-    @foreach (var chat in ViewBag.ListOfChats)
+    @foreach (var chat in Model)
     {
     <form method="post" asp-controller="Chat">
         <input type="hidden" value="@chat" name="chat">
-        <input type="hidden" value="@ViewBag.Nickname" name="nickname">
         <input type="submit" value="Войти в @chat" class="btn btn-secondary btn-lg btn-block"  />
     </form>
     }

@@ -42,8 +42,9 @@ namespace AuthApp
 
             app.UseRouting();
 
-            app.UseAuthentication();    // аутентификация
-            app.UseAuthorization();     // авторизация
+            app.UseAuthentication();    
+            app.UseAuthorization();     
+
 
             app.UseEndpoints(endpoints =>
             {
@@ -51,6 +52,7 @@ namespace AuthApp
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+           
         }
     }
 }

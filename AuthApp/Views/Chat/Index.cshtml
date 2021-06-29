@@ -2,57 +2,60 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 
-@model AuthApp.ViewModels.ChatMessageModel
+@model List<ChatMessage>
 
 @{
 }
 <h1>@ViewBag.Chat</h1>
 
 <form class="input" asp-action="send" asp-controller="Chat">
-    @ViewBag.Nickname
+    <input type="hidden" name="Nickname" value=@ViewBag.Nickname />
+    <input type="hidden" name="ChatName" value=@Model[0].ChatName />
+    <input type="hidden" name="TimeOfPosting"/>
 
-    <input type="hidden" asp-for="ChatName" value=@ViewBag.Chat />
-    <input type="hidden" asp-for="TimeOfPosting" />
-    <input type="text" asp-for="Message" />
-
+    <input type="text"   name="Message" />
     <input type="submit" value="Отправить" />
 </form>
-
-<form class="ChatMessage">
-    <div>
-        @{int i = 0;}
-        @foreach (var user in ViewBag.ListOfUsers)
+<table class="table table-borderless table-striped">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nickname</th>
+            <th scope="col">Time</th>
+            <th scope="col">Message</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var message in Model)
         {
-        <div>
-            @ViewBag.ListOfUsers[i];
-            @ViewBag.ListOfDates[i];
-            @ViewBag.ListOfTexts[i];
-        </div>
-            i++;
+            <tr>
+                <th scope="row"></th>
+                <td width="10%">@message.Nickname;</td>
+                <td>@message.TimeOfPosting;</td>
+                <td>@message.Message;</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
         }
 
-    </div>
-</form>
+        .ChatMessage {
+            height: 500px;
+            width: 100%;
+            border: solid;
+            border-color: dimgrey;
+        }
 
-
-<style type="text/css">
-    * {
-        margin: 0;
-        padding: 0;
-    }
-
-    .ChatMessage {
-        height: 500px;
-        width: 100%;
-        border: solid;
-        border-color: dimgrey;
-    }
-
-    .input {
-        width: 100%;
-        border: solid;
-        border-color: dimgrey;
-    }
-</style>
+        .input {
+            width: 100%;
+            border: solid;
+            border-color: dimgrey;
+        }
+    </style>
 
 
