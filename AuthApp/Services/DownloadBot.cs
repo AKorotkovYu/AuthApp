@@ -11,7 +11,7 @@ namespace AuthApp.Services
 
         public string Execute(string message)
         {
-            if (message == @"/download")
+            if (message == @"/download") 
             {
                 /*логика*/
                 string answer = "какой-то текст";
