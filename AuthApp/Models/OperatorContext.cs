@@ -11,7 +11,7 @@ namespace AuthApp.Models
         public DbSet<User> Users { get; set; }
         public DbSet<Chat> Chats { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
-        public DbSet<ChatUsers> ChatUsers { get; set; }
+
         public OperatorContext(DbContextOptions<OperatorContext> options)
             : base(options)
         {

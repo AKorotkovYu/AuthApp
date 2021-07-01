@@ -1,14 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AuthApp.ViewModels;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using AuthApp.Models;
+using AuthApp.Services;
+using System;
 
 namespace AuthApp.Controllers
 {
@@ -16,11 +12,12 @@ namespace AuthApp.Controllers
     [Authorize]
     public class NewChatController : Controller
     {
-        private OperatorContext db;
-        
-        public NewChatController( OperatorContext context)
+        IStore store;
+
+        public NewChatController( OperatorContext context, IStore store)
         {
-            db = context;
+            this.store = store ?? throw new ArgumentNullException(nameof(store));
+            store.SetDb(context);
         }
 
         [Authorize]
@@ -35,22 +32,29 @@ namespace AuthApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                Chat chat = await db.Chats.FirstOrDefaultAsync(u => u.ChatName == model.ChatName);
-                if (chat == null)
-                {
-                    db.Chats.Add(new Chat { ChatName = model.ChatName});
-                    db.ChatMessages.Add(new ChatMessage { ChatName = model.ChatName, Nickname = "System", TimeOfPosting = DateTime.Now, Message = "Чат создан" });
+                    Chat chat = new Chat
+                    {
+                        ChatName = model.ChatName
+                    };
 
-                    await db.SaveChangesAsync();
+                    User user = store.FindUser(User.Identity.Name);
+                    
+                    chat.ChatUsers.Add(user);
+                    
+                    ChatMessage message = new ChatMessage() {ChatId=chat.Id, ChatName = chat.ChatName, Message = "чат создан", Nickname = "system", TimeOfPosting = System.DateTime.Now, isOld=true};
+                    chat.ChatMessages.Add(message);
+                    user.Chats.Add(chat);
+                    
+                    
+                    store.Add(chat);
+                    store.SaveMessage(message);
+
+                    await store.SaveChanges();
+
                     return RedirectToAction("Index", "Home");
-                }
-                else
-                    ModelState.AddModelError("", "Некорректные логин и(или) пароль");
             }
-            return RedirectToAction("Index", "Home"); ;
+            return RedirectToAction("Index", "Home"); 
         }
     }
 
-
-    
 }

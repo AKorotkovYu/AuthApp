@@ -1,0 +1,19 @@
+﻿
+@{
+    ViewData["Title"] = "Home Page";
+}
+@model Dictionary<User, int>
+
+Список пользователей
+
+<div style="width:90%">
+    @foreach (var user in Model)
+    {
+    <form method="post" asp-controller="AddUserToChat" asp-action="AddUser">
+        <input type="hidden" value="@user.Key.Id" name="userId">
+        <input type="hidden" value="@user.Value" name="chatId">
+        <input type="submit" value="Добавить пользователя @user.Key.Nickname" class="btn btn-secondary btn-lg btn-block" />
+    </form>
+    }
+</div>
+

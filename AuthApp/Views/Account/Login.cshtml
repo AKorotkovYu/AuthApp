@@ -1,30 +1,35 @@
 ﻿@model AuthApp.ViewModels.LoginModel
 
+<div class="position-absolute top-50 start-50 translate-middle overflow-auto border border-0 border-primary">
+    <font style="color: deepskyblue; font-size: 12px; font-family: Arial">
+        <h2>Вход на сайт</h2>
+    </font>
 
-<font style="color: deepskyblue; font-size: 12px; font-family: Arial">
-    <h2>Вход на сайт</h2>
-</font>
 
-
-<form asp-action="Login" asp-controller="Account" asp-anti-forgery="true" class="mb-3">
-    <div class="validation" asp-validation-summary="ModelOnly"></div>
-    <div>
+    <form asp-action="Login" asp-controller="Account" asp-anti-forgery="true" class="mb-3">
+        <div class="validation" asp-validation-summary="ModelOnly"></div>
+        <p>
             <label asp-for="Email">Введите Email</label>
-            <input type="text" asp-for="Email" />
+            <input type="text" asp-for="Email" class="w-100" />
             <span asp-validation-for="Email" />
-    </div>
-    <div>
+        </p>
+        <p>
             <label asp-for="Password">Введите пароль</label>
-            <input asp-for="Password" />
+            <input asp-for="Password" class="w-100" />
             <span asp-validation-for="Password" />
-    </div>
-    <div>
-            <input type="submit" value="Войти" class="btn btn-outline-dark" />
-    </div>
-</form>
+        </p>
+        
+        <p>
+            <input type="submit" value="Войти" class="btn btn-outline-dark w-100" />
+        </p>       
+    </form>
+    <form asp-action="Register" asp-controller="Account" asp-anti-forgery="true">
+        <p>
+            <input type="submit" value="Регистрация" class="btn btn-outline-dark w-100" />
+        </p>
+    </form>
+    
+    
+</div>
 
-<form asp-action="Register" asp-controller="Account" asp-anti-forgery="true">
-    <div>
-    <input type="submit" value="Регистрация" class="btn btn-outline-dark" />
-    </div>
-</form>
+

@@ -13,5 +13,7 @@ namespace AuthApp.Models
         public string Password { get; set; }
         public string Role { get; set; }
         public DateTime DateOfRegistration { get; set; }
+
+        public List<Chat> Chats { get; set; } = new List<Chat>();
     }
 }

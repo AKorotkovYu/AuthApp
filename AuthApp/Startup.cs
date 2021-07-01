@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using AuthApp.Services;
 
 namespace AuthApp
 {
@@ -32,6 +33,11 @@ namespace AuthApp
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 });
             services.AddControllersWithViews();
+            services.AddTransient<IBot, TimeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, DownloadBot>();
+
+            services.AddTransient<IStore, Store>();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -52,7 +58,6 @@ namespace AuthApp
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-           
         }
     }
 }

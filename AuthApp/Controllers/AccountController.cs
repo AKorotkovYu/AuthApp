@@ -15,7 +15,6 @@ namespace AuthApp.Controllers
     {
         private OperatorContext db;
 
-
         public AccountController(OperatorContext context)
         {
             db = context;
@@ -61,7 +60,6 @@ namespace AuthApp.Controllers
                 user = await db.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
                 if (user == null)
                 {
-                    // добавляем пользователя в бд
                     db.Users.Add(new User { Email = model.Email, Nickname = model.Nickname, Password = model.Password });
                     await db.SaveChangesAsync();
 

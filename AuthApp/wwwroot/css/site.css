@@ -63,9 +63,64 @@ body {
   margin-bottom: 60px;
 }
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px; /* Vertically center the text there */
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px; /* Vertically center the text there */
+}
+ :root
+{
+    --send-bg: #0B93F6;
+    --send-color: white;
+    --receive-bg: #E5E5EA;
+    --receive-text: black;
+    --page-background: white;
+}
+
+p {
+    max-width: 100%;
+    word-wrap: break-word;
+    margin-bottom: 12px;
+    line-height: 24px;
+    position: relative;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+.send {
+    color: var(--send-color);
+    background: var(--send-bg);
+    align-self: flex-end;
+}
+
+.receive {
+    background: var(--receive-bg);
+    color: black;
+    align-self: flex-start;
+}
+
+.exit {
+    background: var(--exit-bg);
+    color: red;
+    align-self: flex-start;
+}
+
+.inputform {
+    background: var(--send-bg);
+    color: lightgray;
+    align-self: flex-start;
+}
+
+.buttomsend {
+    background-color: white;
+    border-radius: 5px;
+    max-width: 10%
+}
+
+.inputtext {
+    background-color: transparent;
+    width: 90%;
+    border: none;
+}
 }

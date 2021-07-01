@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AuthApp.ViewModels
 {
-    public class ChatUsersModel
+    public class ChatUserssModel
     {
         [Required(ErrorMessage = "Не указано имя Чата")]
         public string ChatName { get; set; }

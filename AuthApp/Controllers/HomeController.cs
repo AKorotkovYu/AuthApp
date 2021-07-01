@@ -1,34 +1,31 @@
 ﻿using AuthApp.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
+using AuthApp.Services;
 using System.Threading.Tasks;
 using AuthApp.ViewModels;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace AuthApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private OperatorContext db;
+        IStore store;
 
-        public HomeController(ILogger<HomeController> logger, OperatorContext context)
+        public HomeController(OperatorContext context, IStore store)
         {
-            _logger = logger;
-            db = context;
+            this.store = store;
+            store.SetDb(context);
         }
 
         [Authorize]
-        public IActionResult Index(string nickname)
+        public IActionResult Index()
         {
-            List<string> chats = new();
-            foreach(Chat chat in db.Chats)
-            {
-                chats.Add(chat.ChatName);
-            }
+            List<Chat> chats = new();
+            chats=store.GetAllUserChats(User.Identity.Name);
+            
             return View(chats);
         }
 
@@ -41,6 +38,16 @@ namespace AuthApp.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> DelChat(int chatId)
+        {
+            store.Remove(store.FindChat(chatId).Result);
+            await store.SaveChanges();
+            return RedirectToAction("Index", "Home");
         }
     }
 }
