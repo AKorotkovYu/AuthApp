@@ -1,0 +1,18 @@
+﻿@model ChatModel;
+
+
+<form method="post" asp-action="CreateChat" asp-controller="NewChat" asp-anti-forgery="true">
+    <div class="validation" asp-validation-summary="ModelOnly"></div>
+    <div>
+        <div class="form-control">
+            <label asp-for="ChatName">Имя Чата</label><br />
+            <input type="text" asp-for="ChatName" />
+            <span asp-validation-for="ChatName" />
+        </div>
+
+        <div class="cen">
+            <input type="submit" value="Создать чат" class="btn btn-outline-dark" />
+        </div>
+
+    </div>
+</form>
