@@ -46,7 +46,6 @@ namespace OneChat.BLL.Interfaces
         {
             User user = new User { Nickname = userDTO.Nickname, Chats = userDTO.Chats, DateOfRegistration = DateTime.Now, Email = userDTO.Email, Password = userDTO.Password };
             Database.Users.Create(user);
-            SaveChanges();
             return new UserDTO { Id = user.Id, Chats = user.Chats, DateOfRegistration = user.DateOfRegistration, Email = user.Email, Nickname = user.Nickname};
         }
 
@@ -58,10 +57,19 @@ namespace OneChat.BLL.Interfaces
             chat.ChatUsers.Add(user);
             user.Chats.Add(chat);
 
+            /*SaveMessage(new ChatMessageDTO
+            {    
+                Id = user.Id,
+                isOld = true,
+                ChatId = chat.Id,
+                ChatName = chat.ChatName,
+                Nickname = $"/ {user.Id}",
+                Message = "+",
+                TimeOfPosting = DateTime.Now,
+            });*/
+
             Database.Chats.Get(chatId).ChatUsers.Add(user);
             Database.Users.Get(userId).Chats.Add(chat);
-
-            SaveChanges();
         }
 
         public void DelUserFromChat(int userId, int chatId)
@@ -71,7 +79,16 @@ namespace OneChat.BLL.Interfaces
             chat.ChatUsers.Remove(user);
             user.Chats.Remove(chat);
 
-            SaveChanges();
+            /*SaveMessage(new ChatMessageDTO
+            {
+                Id = user.Id,
+                isOld = true,
+                ChatId = chat.Id,
+                ChatName = chat.ChatName,
+                Nickname = $"/ {user.Id}",
+                Message = "-",
+                TimeOfPosting = DateTime.Now,
+            });*/
         }
 
         public Dictionary<UserDTO, int> AllAnotherUsers(int chatId)
@@ -117,10 +134,23 @@ namespace OneChat.BLL.Interfaces
 
         public ChatDTO AddChat(ChatDTO chatDTO)
         {
-            Chat chat = new Chat { AdminId=chatDTO.AdminId, ChatMessages=chatDTO.ChatMessages, ChatName=chatDTO.ChatName, ChatUsers=chatDTO.ChatUsers};
+            Chat chat = new(){ 
+                AdminId=chatDTO.AdminId, 
+                ChatName=chatDTO.ChatName, 
+                ChatUsers=chatDTO.ChatUsers,
+                ChatMessages=chatDTO.ChatMessages
+            };
+
             Database.Chats.Create(chat);
             SaveChanges();
-            return new ChatDTO {ChatMessages=chat.ChatMessages, AdminId=chat.AdminId, ChatName=chat.ChatName, ChatUsers=chat.ChatUsers, Id= chat.Id };
+
+            return new ChatDTO {
+                Id = chat.Id,
+                AdminId = chat.AdminId, 
+                ChatName = chat.ChatName, 
+                ChatUsers = chat.ChatUsers, 
+                ChatMessages = chat.ChatMessages, 
+                };
         }
 
         public void RemoveChat(int chatId)
@@ -155,14 +185,15 @@ namespace OneChat.BLL.Interfaces
             
             foreach(ChatMessage chatMessage in chatMessages)
             {
-                chatMessageDTOs.Add(new ChatMessageDTO { 
-                    ChatId = chatMessage.ChatId, 
-                    ChatName = chatMessage.ChatName, 
-                    Id = chatMessage.Id, 
-                    Message = chatMessage.Message, 
-                    isOld = chatMessage.IsOld, 
-                    Nickname = chatMessage.Nickname, 
-                    TimeOfPosting = chatMessage.TimeOfPosting 
+                chatMessageDTOs.Add(new ChatMessageDTO
+                {
+                    ChatId = chatMessage.ChatId,
+                    ChatName = chatMessage.ChatName,
+                    Id = chatMessage.Id,
+                    Message = chatMessage.Message,
+                    isOld = chatMessage.IsOld,
+                    Nickname = chatMessage.Nickname,
+                    TimeOfPosting = chatMessage.TimeOfPosting
                 });
             }
             return chatMessageDTOs;

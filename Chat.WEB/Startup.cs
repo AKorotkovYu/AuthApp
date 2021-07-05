@@ -30,9 +30,8 @@ namespace OneChat.WEB
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<OperatorContext>(options => options.UseSqlServer(connection));
 
-            // óñòàíîâêà êîíôèãóðàöèè ïîäêëþ÷åíèÿ
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options => //CookieAuthenticationOptions
+                .AddCookie(options =>
                 {
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 });

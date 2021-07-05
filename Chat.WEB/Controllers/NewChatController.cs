@@ -13,7 +13,7 @@ namespace OneChat.WEB.Controllers
     [Authorize]
     public class NewChatController : Controller
     {
-        IStore store;
+        readonly IStore store;
 
         public NewChatController(IStore store)
         {
@@ -38,20 +38,19 @@ namespace OneChat.WEB.Controllers
                 {
                     ChatName = chatModel.ChatName,
                     AdminId = userDTO.Id,
+                    ChatMessages = new()
                 };
                 
                 newChat=store.AddChat(newChat);
-
-                store.SaveMessage(new()
+                
+                newChat.ChatMessages.Add(new()
                 {
                     ChatId = newChat.Id,
                     ChatName = newChat.ChatName,
                     Message = "чат создан",
                     Nickname = "system",
-                    TimeOfPosting = System.DateTime.Now,
-                    isOld = true
+                    TimeOfPosting = System.DateTime.Now
                 });
-
                 store.AddUserToChat(userDTO.Id, newChat.Id);
                 store.SaveChanges();
             }

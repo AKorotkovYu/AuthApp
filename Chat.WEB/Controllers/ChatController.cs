@@ -55,7 +55,6 @@ namespace OneChat.WEB.Controllers
             foreach (var bot in bots)
             {
                 string answer = bot.Execute(model.Message);
-
                 if (answer != null)
                 {
                     store.SaveMessage(new()
@@ -85,7 +84,7 @@ namespace OneChat.WEB.Controllers
         [HttpPost]
         public IActionResult Exit(int userId, int chatId)
         {
-            store.DelUserFromChat(store.GetUser(userId).Id, chatId);
+            store.DelUserFromChat(store.GetUser(User.Identity.Name).Id, chatId);
             store.SaveChanges();
             return RedirectToAction("Index", "Home");
         }

@@ -14,7 +14,7 @@ namespace OneChat.WEB.Controllers
 {
     public class AccountController : Controller
     {
-        private IStore store;
+        private readonly IStore store;
 
         public AccountController(IStore store)
         {
@@ -77,7 +77,7 @@ namespace OneChat.WEB.Controllers
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, userName)
+                new Claim(ClaimsIdentity.DefaultNameClaimType, userName),
             };
             ClaimsIdentity id = new(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
 

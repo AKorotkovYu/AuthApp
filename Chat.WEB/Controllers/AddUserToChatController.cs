@@ -7,7 +7,7 @@ namespace AuthApp.Controllers
 {
     public class AddUserToChatController : Controller
     {
-        IStore store;
+        readonly IStore store;
 
         public AddUserToChatController(IStore store)
         {
