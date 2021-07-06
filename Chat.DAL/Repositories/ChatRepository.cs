@@ -25,7 +25,7 @@ namespace OneChat.DAL.Repositories
         public Chat Get(int id)
         {
       
-            return db.Chats.Find(id);
+            return db.Chats.Include(c=>c.ChatUsers).Where(c=>c.Id==id).First();
         }
 
         public void Create(Chat chat)

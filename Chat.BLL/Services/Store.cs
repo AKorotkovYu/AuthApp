@@ -26,7 +26,7 @@ namespace OneChat.BLL.Interfaces
 
         public UserDTO GetUser(string email, string password)
         {
-            User user = Database.Users.Find(u => u.Email == email && u.Password == password).First();
+            User user = Database.Users.GetAll().FirstOrDefault(u => u.Email == email && u.Password == password);
             if (user == null)
                 return null;
             else 
@@ -35,7 +35,7 @@ namespace OneChat.BLL.Interfaces
 
         public UserDTO GetUser(string nickname)
         {
-            User user = Database.Users.Find(u => u.Nickname==nickname).First();
+            User user = Database.Users.GetAll().FirstOrDefault(u => u.Nickname == nickname);
             if (user == null)
                 return null;
             else
@@ -57,17 +57,6 @@ namespace OneChat.BLL.Interfaces
             chat.ChatUsers.Add(user);
             user.Chats.Add(chat);
 
-            /*SaveMessage(new ChatMessageDTO
-            {    
-                Id = user.Id,
-                isOld = true,
-                ChatId = chat.Id,
-                ChatName = chat.ChatName,
-                Nickname = $"/ {user.Id}",
-                Message = "+",
-                TimeOfPosting = DateTime.Now,
-            });*/
-
             Database.Chats.Get(chatId).ChatUsers.Add(user);
             Database.Users.Get(userId).Chats.Add(chat);
         }
@@ -77,18 +66,11 @@ namespace OneChat.BLL.Interfaces
             User user = Database.Users.GetAll().Where(c => c.Id == userId).First();
             Chat chat = Database.Chats.GetAll().Where(c => c.Id == chatId).First();
             chat.ChatUsers.Remove(user);
-            user.Chats.Remove(chat);
-
-            /*SaveMessage(new ChatMessageDTO
+            if(chat.AdminId==user.Id)
             {
-                Id = user.Id,
-                isOld = true,
-                ChatId = chat.Id,
-                ChatName = chat.ChatName,
-                Nickname = $"/ {user.Id}",
-                Message = "-",
-                TimeOfPosting = DateTime.Now,
-            });*/
+                chat.AdminId = chat.ChatUsers.First().Id;
+            }
+            user.Chats.Remove(chat);
         }
 
         public Dictionary<UserDTO, int> AllAnotherUsers(int chatId)
@@ -109,8 +91,21 @@ namespace OneChat.BLL.Interfaces
 
         public List<ChatDTO> GetAllUserChats(int userId)
         {
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<Chat, ChatDTO>()).CreateMapper();
-            return mapper.Map<List<Chat>, List<ChatDTO>>(Database.Users.GetAll().Where(c => c.Id == userId).First().Chats);
+            List<ChatDTO> chatsDTO= new();
+            
+            foreach(var chat in Database.Users.Get(userId).Chats)
+            {
+                Chat fullChat=Database.Chats.Get(chat.Id);
+                chatsDTO.Add(new()
+                {
+                    ChatMessages = chat.ChatMessages,
+                    ChatName = chat.ChatName,
+                    ChatUsers = fullChat.ChatUsers,
+                    AdminId = chat.AdminId,
+                    Id = chat.Id
+                });
+            }
+            return chatsDTO;
         }
 
         public void SaveMessage(ChatMessageDTO messageDTO)
@@ -178,12 +173,26 @@ namespace OneChat.BLL.Interfaces
             };
         }
 
+        private List<ChatMessage> GetMessagesCheckOld(int chatId)
+        {
+            foreach (ChatMessage chatMessage in Database.ChatMessages.GetAll().Where(c => c.ChatId == chatId).ToList())
+            {
+                if (DateTime.Now >= chatMessage.TimeOfPosting.AddDays(+1))
+                    chatMessage.IsOld = true;
+                else
+                    chatMessage.IsOld = false;
+            }
+            SaveChanges();
+            return Database.ChatMessages.GetAll().Where(c => c.ChatId == chatId).ToList();
+        }
+
         public List<ChatMessageDTO> GetMessages(int chatId)
         {
-            List<ChatMessage> chatMessages= Database.ChatMessages.GetAll().Where(c=>c.ChatId==chatId).ToList();
-            List<ChatMessageDTO> chatMessageDTOs = new(); 
+            List<ChatMessage> chatMessages = GetMessagesCheckOld(chatId);
+            List<ChatMessageDTO> chatMessageDTOs = new();
             
-            foreach(ChatMessage chatMessage in chatMessages)
+
+            foreach (ChatMessage chatMessage in chatMessages)
             {
                 chatMessageDTOs.Add(new ChatMessageDTO
                 {

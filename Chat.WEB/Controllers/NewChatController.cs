@@ -32,7 +32,7 @@ namespace OneChat.WEB.Controllers
         {
             if (ModelState.IsValid)
             {
-                UserDTO userDTO = store.GetUser(User.Identity.Name);//TODO: USERID
+                UserDTO userDTO = store.GetUser(Int32.Parse(User.Identity.Name));
 
                 ChatDTO newChat = new()
                 {
@@ -51,7 +51,7 @@ namespace OneChat.WEB.Controllers
                     Nickname = "system",
                     TimeOfPosting = System.DateTime.Now
                 });
-                store.AddUserToChat(userDTO.Id, newChat.Id);
+                store.AddUserToChat(Int32.Parse(User.Identity.Name), newChat.Id);
                 store.SaveChanges();
             }
             return RedirectToAction("Index", "Home");

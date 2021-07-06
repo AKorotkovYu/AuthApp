@@ -4,35 +4,40 @@
 
 @model List<ChatDTO>
 
-<div class="text-center">
-    <h1 class="display-3">Welcome @User.Identity.Name</h1>
+<div class="text-center" >
+    <h2 class="display-3 text-info">Добро пожаловать, @User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault()</h2>
 </div>
+<br>
 
-Список Чатов
 
-<div style="width: 100%; border-radius: 15px; box-shadow: 2px 4px 4px 4px #939292; ">
+<div style="width: 100%; border-radius: 15px; box-shadow: 2px 4px 4px 4px #939292; position:center; margin:10px">
+    <h4 class="display-4 text-center">Список Чатов</h4>
     @foreach (var chat in Model)
     {
-        <form method="post" asp-controller="Chat" style='float: left'>
+    <div style="margin: 10px 10px 10px 10px; background-color: #1111; border-radius: 10px 10px 10px 10px ">
+        <form method="post" asp-controller="Chat">
             <input type="hidden" value="@chat.Id" name="chatId">
-            <input type="submit" value="Войти в @chat.ChatName" class="bg-white border-0" />
+            <input type="submit" value="Войти в @chat.ChatName" class="bg-transparent border-0" />
         </form>
-        @if (chat.ChatUsers.First().Nickname == User.Identity.Name)
+        @if (chat.AdminId.ToString() == User.Identity.Name)
         {
-            <form method="post" asp-action="DelChat" asp-controller="Home" style='float: right'>
+            <form method="post" asp-action="DelChat" asp-controller="Home">
                 <input type="hidden" value="@chat.Id" name="chatId">
                 <input type="submit" value="x" class="bg-transparent border-0" />
             </form>
         }
         <form method="post" asp-controller="AddUserToChat">
             <input type="hidden" value="@chat.Id" name="chatId">
-            <input type="submit" value="+" class="bg-transparent border-0" />
+            <input type="submit" value="Добавить в чат" class="bg-transparent border-0" />
         </form>
-
+    </div>
     }
+    <br>
+    <form asp-area="" asp-controller="NewChat" asp-action="Index" width:100%">
+        <input type="submit" value="Новый чат" class="btn btn-primary btn-lg btn-block;" style="border-radius: 0px 0px 0px 15px" />
+    </form>
 </div>
 
-<br>
-<form asp-area="" asp-controller="NewChat" asp-action="Index" style="position:absolute; width:100%">
-    <input type="submit" value="Новый чат" class="btn btn-primary btn-lg btn-block" />
- </form>
+
+
+

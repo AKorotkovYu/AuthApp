@@ -38,7 +38,7 @@ namespace OneChat.WEB.Controllers
                 userObject = store.GetUser(model.Email, model.Password);
                 if (userObject != null)
                 {
-                    await Authenticate(model.Email); // аутентификация
+                    await Authenticate(userObject.Id); // аутентификация
                     return RedirectToAction("Index", "Home");
                 }
             }
@@ -62,8 +62,9 @@ namespace OneChat.WEB.Controllers
                 {
                     store.AddNewUser(new UserDTO { Email = model.Email, Nickname = model.Nickname, Password = model.Password });
                     store.SaveChanges();
+                    userObject = store.GetUser(model.Email);
 
-                    await Authenticate(model.Nickname); // аутентификация
+                    await Authenticate(userObject.Id); // аутентификация
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -73,11 +74,12 @@ namespace OneChat.WEB.Controllers
             return View(model);
         }
 
-        private async Task Authenticate(string userName)
+        private async Task Authenticate(int userName)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, userName),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, userName.ToString()),
+                new Claim("Nickname", store.GetUser(userName).Nickname)
             };
             ClaimsIdentity id = new(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
 

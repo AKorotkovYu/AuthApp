@@ -10,7 +10,7 @@ namespace OneChat.DAL.Repositories
 {
     class UserRepository : IRepository<User>
     {
-        private OperatorContext db;
+        private readonly OperatorContext db;
 
         public UserRepository(OperatorContext context)
         {
@@ -24,7 +24,7 @@ namespace OneChat.DAL.Repositories
 
         public User Get(int id)
         {
-            return db.Users.Find(id);
+            return db.Users.Include(c=>c.Chats).Where(c=>c.Id==id).First();
         }
 
         public void Create(User user)
@@ -39,7 +39,7 @@ namespace OneChat.DAL.Repositories
 
         public IEnumerable<User> Find(Func<User, Boolean> predicate)
         {
-            return db.Users.Where(predicate).ToList();
+            return db.Users.Include(c=>c.Chats).Where(predicate).ToList();
         }
 
         public void Delete(int id)

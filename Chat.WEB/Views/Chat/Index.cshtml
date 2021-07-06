@@ -8,53 +8,69 @@
 }
 <h1>@Model.First().ChatName</h1>
 
-<form class="inputform" asp-action="exit" asp-controller="Chat">
-    <input type="hidden" name="Nickname" value=@User.Identity.Name />
+<div style="min-width: 50%; position: center; border-radius: 15px 15px 15px 15px; box-shadow: 2px 4px 4px 4px #939292; ">
+    <form class="inputform" asp-action="exit" asp-controller="Chat">
+    <input type="hidden" name="Nickname" value=@User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault() />
     <input type="hidden" name="chatId" value="@Model.First().ChatId" />
     <input type="hidden" name="TimeOfPosting" />
-    <p class="exit">
-        <input type="submit" value="Выйти из чата" />
+    <p class="exit" style="width:10%">
+        <input type="submit" value="Выйти из чата" class="btn btn-primary btn-lg btn-block" style="border-radius: 15px 0px 0px 0px" />
     </p>
-</form>
-
-@foreach (var message in Model)
-{
-    <form asp-action="DelMes" asp-controller="Chat">
-
-        @if (message.Nickname == User.Identity.Name)
-        {
-            <p class="send">
-                @message.Nickname <br>
-                @message.TimeOfPosting - @message.Message
-                <input type="hidden" value="@message.ChatId" name="chatId">
-                <input type="hidden" value="@message.Id" name="mesId">
-                <input type="submit" value="x" class="bg-transparent border-0" style='float: right' />
-            </p>
-        }
-        else
-        {
-            <p class="receive">
-                @message.Nickname <br>
-                @message.TimeOfPosting - @message.Message
-            </p>
-        }
     </form>
-}
 
+    <div style="position: center; border-radius: 15px 15px 15px 15px; margin:10px">
+       
+        @foreach (var message in Model)
+        {
+        <form asp-action="DelMes" asp-controller="Chat" style="margin: 10px 10px 10px 10px; background-color: #1111; border-radius: 10px 10px 10px 10px ">
 
-<form asp-action="send" asp-controller="Chat">
-    <p class="inputform">
+            @if (message.Nickname == User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault())
+            {
+                <div class="send" style="margin: 10px">
+                    <p style="margin: 10px; background-color: #2222; text-align:center">
+                        @message.Nickname 
+                        @message.TimeOfPosting
+                    </p>
+                    <p style="margin: 10px">
+                        @message.Message
+                    </p>
+                    <input type="hidden" value="@message.ChatId" name="chatId">
+                    <input type="hidden" value="@message.Id" name="mesId">
+
+                </div>
+            }
+            else
+            {
+                <div class="receive" style="margin: 10px">
+                    <p style="margin: 10px; background-color: #2222; text-align: center ">
+                        @message.Nickname @message.TimeOfPosting
+                    </p>
+                    <p style="margin: 10px">
+                        @message.Message
+                    </p>
+
+                </div>
+            }
+            @if (message.isOld == false)
+            {
+                <input type="submit" value="x" class="bg-transparent border-0" />
+            }
+        </form>
+        }
+        </div>
+    <br>
+    <div style="border-radius: 0px 0px 15px 15px;  background-color:royalblue">
+    <form asp-action="send" asp-controller="Chat">
         <input type="hidden" name="Nickname" value=@User.Identity.Name />
         <input type="hidden" name="ChatName" value="@Model.First().ChatName" />
         <input type="hidden" name="ChatId" value="@Model.First().ChatId" />
         <input type="hidden" name="TimeOfPosting" />
 
-        <input type="text" name="Message" class="inputtext" />
-        <input type="submit" class="button" value=">" />
-    </p>
-</form>
+        <input type="text" name="Message" class="inputtext" style="border-radius: 0px 0px 0px 15px; border-block-color: #1111; border-left: none; width: 90%" />
+        <input type="submit" value=">" style="border-radius: 0px 15px 15px 0px; width: 9%; border:none; background-color:transparent" />
+    </form>
+    </div>
+</div>
+<br>
 
-<style>
-</style>
-
-
+    

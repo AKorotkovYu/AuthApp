@@ -1,13 +1,7 @@
-﻿using OneChat.WEB.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
-using OneChat.BLL.DTO;
-using System.Threading.Tasks;
-using AutoMapper;
-using OneChat.BLL.Infrastructure;
 using OneChat.BLL.Interfaces;
+using System;
 
 namespace AuthApp.Controllers
 {
@@ -23,7 +17,7 @@ namespace AuthApp.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            return View(store.GetAllUserChats(1));//TODO: Взять ID
+            return View(store.GetAllUserChats(Int32.Parse(User.Identity.Name)));
         }
 
         public IActionResult Privacy()
@@ -36,7 +30,7 @@ namespace AuthApp.Controllers
         [HttpPost]
         public IActionResult DelChat(int chatId)
         {
-            store.RemoveChat(chatId);//Remove(store.FindChat(chatId).Result);
+            store.RemoveChat(chatId);
             store.SaveChanges();
             return RedirectToAction("Index", "Home");
         }

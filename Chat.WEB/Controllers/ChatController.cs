@@ -16,6 +16,7 @@ namespace OneChat.WEB.Controllers
     {
         private readonly IServiceProvider serv;
         private readonly IStore store;
+        UserDTO user;
 
         public ChatController(IServiceProvider serv, IStore store)
         {
@@ -26,13 +27,6 @@ namespace OneChat.WEB.Controllers
         [Authorize]
         public IActionResult Index(int chatId)
         {
-            foreach (ChatMessageDTO message in store.GetMessages(chatId))
-            {
-                if (DateTime.Now >= message.TimeOfPosting.AddDays(+1))
-                    message.isOld = true;
-                else
-                    message.isOld = false;
-            }
             return View(store.GetMessages(chatId));
         }
 
@@ -46,7 +40,7 @@ namespace OneChat.WEB.Controllers
                 ChatId = model.ChatId,
                 ChatName = model.ChatName,
                 Message = model.Message,
-                Nickname = HttpContext.User.Identity.Name,
+                Nickname = User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault(),
                 TimeOfPosting = System.DateTime.Now
             });
 
@@ -75,7 +69,9 @@ namespace OneChat.WEB.Controllers
         [HttpPost]
         public IActionResult DelMes(int chatId, int mesId)
         {
-            store.RemoveMessage(mesId);
+            if(store.GetMessage(mesId).TimeOfPosting>DateTime.Now.AddDays(-1))
+                store.RemoveMessage(mesId);
+            
             store.SaveChanges();
             return RedirectToAction("Index", "Chat", new { chatId });
         }
@@ -84,7 +80,7 @@ namespace OneChat.WEB.Controllers
         [HttpPost]
         public IActionResult Exit(int userId, int chatId)
         {
-            store.DelUserFromChat(store.GetUser(User.Identity.Name).Id, chatId);
+            store.DelUserFromChat(store.GetUser(Int32.Parse(User.Identity.Name)).Id, chatId);
             store.SaveChanges();
             return RedirectToAction("Index", "Home");
         }
