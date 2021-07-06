@@ -3,6 +3,7 @@ using OneChat.DAL.Entities;
 using OneChat.DAL.Interfaces;
 using OneChat.DAL.EF;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace OneChat.DAL.Repositories
 {
@@ -47,9 +48,9 @@ namespace OneChat.DAL.Repositories
             }
         }
 
-        public void Save()
+        public async Task Save()
         {
-            db.SaveChanges();
+           await db.SaveChangesAsync();
         }
 
         private bool disposed = false;

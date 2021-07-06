@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using OneChat.BLL.Interfaces;
 using System;
+using System.Threading.Tasks;
 
 namespace AuthApp.Controllers
 {
@@ -20,6 +21,7 @@ namespace AuthApp.Controllers
             return View(store.GetAllUserChats(Int32.Parse(User.Identity.Name)));
         }
 
+        [Authorize]
         public IActionResult Privacy()
         {
             return View();
@@ -27,11 +29,9 @@ namespace AuthApp.Controllers
 
         [Authorize]
         [HttpPost]
-        [HttpPost]
-        public IActionResult DelChat(int chatId)
+        public async Task<IActionResult> DelChat(int chatId)
         {
-            store.RemoveChat(chatId);
-            store.SaveChanges();
+            await store.RemoveChat(chatId);
             return RedirectToAction("Index", "Home");
         }
     }

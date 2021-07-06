@@ -1,10 +1,6 @@
 ﻿
 using OneChat.BLL.BusinessModel;
 using OneChat.BLL.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OneChat.DAL.EF;
 using OneChat.DAL.Interfaces;
 using OneChat.DAL.Repositories;
+using OneChat.BLL.Services;
 
 namespace OneChat.WEB
 {
@@ -42,6 +39,7 @@ namespace OneChat.WEB
             services.AddTransient<IBot, TimeBot>();
             services.AddTransient<IBot, JokeBot>();
             services.AddTransient<IBot, DownloadBot>();
+            services.AddTransient<ILogic, Logic>();
 
             services.AddTransient<IStore, Store>();
         }
@@ -49,11 +47,8 @@ namespace OneChat.WEB
         public void Configure(IApplicationBuilder app)
         {
             app.UseDeveloperExceptionPage();
-
             app.UseStaticFiles();
-
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
 

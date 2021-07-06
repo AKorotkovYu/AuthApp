@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using OneChat.BLL.Interfaces;
@@ -60,12 +59,9 @@ namespace OneChat.WEB.Controllers
                 userObject = store.GetUser(model.Email, model.Password);
                 if (userObject == null)
                 {
-                    store.AddNewUser(new UserDTO { Email = model.Email, Nickname = model.Nickname, Password = model.Password });
-                    store.SaveChanges();
+                    await store.AddNewUser(new UserDTO { Email = model.Email, Nickname = model.Nickname, Password = model.Password });
                     userObject = store.GetUser(model.Email);
-
                     await Authenticate(userObject.Id); // аутентификация
-
                     return RedirectToAction("Index", "Home");
                 }
                 else

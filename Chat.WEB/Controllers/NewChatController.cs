@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using System;
-using OneChat.BLL.DTO;
 using OneChat.BLL.Interfaces;
 using OneChat.WEB.Models;
-using OneChat.WEB.Controllers;
+using OneChat.BLL.DTO;
+using System.Threading.Tasks;
 
 namespace OneChat.WEB.Controllers
 {
@@ -13,12 +12,11 @@ namespace OneChat.WEB.Controllers
     [Authorize]
     public class NewChatController : Controller
     {
-        readonly IStore store;
+        readonly ILogic logic;
 
-        public NewChatController(IStore store)
+        public NewChatController(ILogic logic)
         {
-            this.store = store ?? throw new ArgumentNullException(nameof(store));
-            this.store=store;
+            this.logic = logic ?? throw new ArgumentNullException(nameof(logic));
         }
 
         [Authorize]
@@ -27,32 +25,19 @@ namespace OneChat.WEB.Controllers
             return View();
         }
 
+        [Authorize]
         [HttpPost]
-        public IActionResult CreateChat(ChatModel chatModel)
+        public async Task<IActionResult> CreateChat(ChatModel chatModel)
         {
             if (ModelState.IsValid)
             {
-                UserDTO userDTO = store.GetUser(Int32.Parse(User.Identity.Name));
-
-                ChatDTO newChat = new()
-                {
-                    ChatName = chatModel.ChatName,
-                    AdminId = userDTO.Id,
-                    ChatMessages = new()
-                };
-                
-                newChat=store.AddChat(newChat);
-                
-                newChat.ChatMessages.Add(new()
-                {
-                    ChatId = newChat.Id,
-                    ChatName = newChat.ChatName,
-                    Message = "чат создан",
-                    Nickname = "system",
-                    TimeOfPosting = System.DateTime.Now
-                });
-                store.AddUserToChat(Int32.Parse(User.Identity.Name), newChat.Id);
-                store.SaveChanges();
+                await logic.CreateChat(
+                    Int32.Parse(User.Identity.Name),
+                    new ChatDTO() { 
+                        Id=chatModel.Id, 
+                        ChatName=chatModel.ChatName,
+                        AdminId=chatModel.AdminId
+                    });
             }
             return RedirectToAction("Index", "Home");
         }

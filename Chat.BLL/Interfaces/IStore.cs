@@ -8,9 +8,9 @@ namespace OneChat.BLL.Interfaces
     public interface IStore
     {
 
-        public UserDTO AddNewUser(UserDTO userDTO);
-        public void AddUserToChat(int userId, int chatId);
-        public void DelUserFromChat(int userId, int chatId);
+        public Task<UserDTO> AddNewUser(UserDTO userDTO);
+        public Task AddUserToChat(int userId, int chatId);
+        public Task DelUserFromChat(int userId, int chatId);
         public UserDTO GetUser(string Email, string Password);
         public UserDTO GetUser(string nickname);
 
@@ -21,13 +21,11 @@ namespace OneChat.BLL.Interfaces
         public List<ChatDTO> GetAllUserChats(int userId);
         
         public ChatMessageDTO GetMessage(int mesId);
-        public void SaveMessage(ChatMessageDTO messageDTO);
-        public List<ChatMessageDTO> GetMessages(int chatId);
+        public Task SaveMessage(ChatMessageDTO messageDTO);
+        public Task<List<ChatMessageDTO>> GetMessages(int chatId);
 
-        public ChatDTO AddChat(ChatDTO chat);
-        public void RemoveChat(int chatId);
-        public void RemoveMessage(int messageId);
-
-        public void SaveChanges();
+        public Task<ChatDTO> AddChat(ChatDTO chat);
+        public Task RemoveChat(int chatId);
+        public Task RemoveMessage(int messageId);
     }
 }

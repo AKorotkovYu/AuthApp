@@ -2,18 +2,15 @@
 using System.Linq;
 using OneChat.DAL.EF;
 using OneChat.BLL.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 using OneChat.BLL.DTO;
 using OneChat.DAL.Entities;
-//using OneChat.BLL.BusinessModels;
 using OneChat.DAL.Interfaces;
-using OneChat.BLL.Infrastructure;
 using AutoMapper;
 using System;
+using System.Threading.Tasks;
 
 
-namespace OneChat.BLL.Interfaces
+namespace OneChat.BLL.Services
 {
     public class Store : IStore
     {
@@ -42,14 +39,15 @@ namespace OneChat.BLL.Interfaces
                 return new UserDTO { Chats = user.Chats, DateOfRegistration = user.DateOfRegistration, Email = user.Email, Id = user.Id, Nickname = user.Nickname };
         }
 
-        public UserDTO AddNewUser(UserDTO userDTO)
+        public async Task<UserDTO> AddNewUser(UserDTO userDTO)
         {
-            User user = new User { Nickname = userDTO.Nickname, Chats = userDTO.Chats, DateOfRegistration = DateTime.Now, Email = userDTO.Email, Password = userDTO.Password };
+            User user = new() { Nickname = userDTO.Nickname, Chats = userDTO.Chats, DateOfRegistration = DateTime.Now, Email = userDTO.Email, Password = userDTO.Password };
             Database.Users.Create(user);
+            await Database.Save();
             return new UserDTO { Id = user.Id, Chats = user.Chats, DateOfRegistration = user.DateOfRegistration, Email = user.Email, Nickname = user.Nickname};
         }
 
-        public void AddUserToChat(int userId, int chatId)
+        public async Task AddUserToChat(int userId, int chatId)
         {
             User user = Database.Users.Get(userId);
             Chat chat = Database.Chats.Get(chatId);
@@ -59,9 +57,10 @@ namespace OneChat.BLL.Interfaces
 
             Database.Chats.Get(chatId).ChatUsers.Add(user);
             Database.Users.Get(userId).Chats.Add(chat);
+            await Database.Save();
         }
 
-        public void DelUserFromChat(int userId, int chatId)
+        public async Task DelUserFromChat(int userId, int chatId)
         { 
             User user = Database.Users.GetAll().Where(c => c.Id == userId).First();
             Chat chat = Database.Chats.GetAll().Where(c => c.Id == chatId).First();
@@ -71,16 +70,14 @@ namespace OneChat.BLL.Interfaces
                 chat.AdminId = chat.ChatUsers.First().Id;
             }
             user.Chats.Remove(chat);
+            await Database.Save();
         }
 
         public Dictionary<UserDTO, int> AllAnotherUsers(int chatId)
         {
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<User, UserDTO>()).CreateMapper();
-            
             Dictionary<User, int> users = new();
-
             Chat chat = Database.Chats.GetAll().Where(c => c.Id == chatId).First();
-
             foreach (User user in Database.Users.GetAll())
             {
                 if (user.Chats.Find(c => c.Id == chat.Id) == null)
@@ -91,7 +88,7 @@ namespace OneChat.BLL.Interfaces
 
         public List<ChatDTO> GetAllUserChats(int userId)
         {
-            List<ChatDTO> chatsDTO= new();
+            List<ChatDTO> chatsDTO = new();
             
             foreach(var chat in Database.Users.Get(userId).Chats)
             {
@@ -108,7 +105,7 @@ namespace OneChat.BLL.Interfaces
             return chatsDTO;
         }
 
-        public void SaveMessage(ChatMessageDTO messageDTO)
+        public async Task SaveMessage(ChatMessageDTO messageDTO)
         {
             ChatMessage message = new() { 
                 Id = messageDTO.Id, 
@@ -120,14 +117,16 @@ namespace OneChat.BLL.Interfaces
                 TimeOfPosting = messageDTO.TimeOfPosting 
             };
             Database.ChatMessages.Create(message);
+            await Database.Save();
         }
 
-        public void RemoveMessage(int messageId)
+        public async Task RemoveMessage(int messageId)
         {
             Database.ChatMessages.Delete(messageId);
+           await Database.Save();
         }
 
-        public ChatDTO AddChat(ChatDTO chatDTO)
+        public async Task<ChatDTO> AddChat(ChatDTO chatDTO)
         {
             Chat chat = new(){ 
                 AdminId=chatDTO.AdminId, 
@@ -137,9 +136,9 @@ namespace OneChat.BLL.Interfaces
             };
 
             Database.Chats.Create(chat);
-            SaveChanges();
+            await Database.Save();
 
-            return new ChatDTO {
+             return new ChatDTO {
                 Id = chat.Id,
                 AdminId = chat.AdminId, 
                 ChatName = chat.ChatName, 
@@ -148,7 +147,7 @@ namespace OneChat.BLL.Interfaces
                 };
         }
 
-        public void RemoveChat(int chatId)
+        public async Task RemoveChat(int chatId)
         {
             Chat chat = Database.Chats.Get(chatId);
             foreach(User user in Database.Users.GetAll())
@@ -156,6 +155,7 @@ namespace OneChat.BLL.Interfaces
                 user.Chats.Remove(chat);
             }
             Database.Chats.Delete(chatId);
+            await Database.Save();
         }
 
         public ChatMessageDTO GetMessage(int mesId)
@@ -173,7 +173,7 @@ namespace OneChat.BLL.Interfaces
             };
         }
 
-        private List<ChatMessage> GetMessagesCheckOld(int chatId)
+        private async Task<List<ChatMessage>> GetMessagesCheckOld(int chatId)
         {
             foreach (ChatMessage chatMessage in Database.ChatMessages.GetAll().Where(c => c.ChatId == chatId).ToList())
             {
@@ -182,13 +182,13 @@ namespace OneChat.BLL.Interfaces
                 else
                     chatMessage.IsOld = false;
             }
-            SaveChanges();
+            await Database.Save();
             return Database.ChatMessages.GetAll().Where(c => c.ChatId == chatId).ToList();
         }
 
-        public List<ChatMessageDTO> GetMessages(int chatId)
+        public async Task<List<ChatMessageDTO>> GetMessages(int chatId)
         {
-            List<ChatMessage> chatMessages = GetMessagesCheckOld(chatId);
+            List<ChatMessage> chatMessages =  await GetMessagesCheckOld(chatId);
             List<ChatMessageDTO> chatMessageDTOs = new();
             
 
@@ -224,11 +224,6 @@ namespace OneChat.BLL.Interfaces
         {
             Chat chat = Database.Chats.Get(chatId);
             return new ChatDTO { AdminId = chat.AdminId, ChatName = chat.ChatName, Id=chat.Id};
-        }
-        
-        public void SaveChanges()
-        {
-            Database.Save();
         }
     }
 }

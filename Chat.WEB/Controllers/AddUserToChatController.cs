@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using OneChat.BLL.Interfaces;
 using System;
+using System.Threading.Tasks;
 
 namespace AuthApp.Controllers
 {
@@ -14,16 +15,16 @@ namespace AuthApp.Controllers
             this.store = store ?? throw new ArgumentNullException(nameof(store));
         }
 
+        [Authorize]
         public IActionResult Index(int chatId)
         {
             return View(store.AllAnotherUsers(chatId));
         }
 
         [Authorize]
-        public IActionResult AddUser(int userId, int chatId)
+        public async Task<IActionResult> AddUser(int userId, int chatId)
         {
-            store.AddUserToChat(userId, chatId);
-            store.SaveChanges();
+            await store.AddUserToChat(userId, chatId);
 
             return RedirectToAction("Index", "AddUserToChat", new { chatId });
         }
