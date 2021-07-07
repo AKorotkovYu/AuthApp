@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AuthApp.Controllers
 {
-    public class AddUserToChatController : Controller
+    public class AddUserToChatController : Controller 
     {
         readonly IStore store;
 
