@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using OneChat.BLL.Interfaces;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace OneChat.BLL.BusinessModel
 {
-    public class JokeBot: IBot
+    public class JokeBot : IBot
     {
         private readonly List<string> phrases = new();
         private readonly List<string> jokes = new();
@@ -26,11 +28,13 @@ namespace OneChat.BLL.BusinessModel
             jokes.Add("Шутка 8");
             jokes.Add("Шутка 9");
         }
-
         public string Name => "Joker";
-       
+
+        public Task<string> ExecuteAsync(string message) => Task.Run(() => Execute(message));
+
         public string Execute(string message)
         {
+            Thread.Sleep(25000);
             if (message != null)
             {
                 var splittedMessage = message.Split();

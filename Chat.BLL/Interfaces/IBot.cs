@@ -1,8 +1,11 @@
-﻿namespace OneChat.BLL.Interfaces
-{ 
+﻿using System.Threading.Tasks;
+
+namespace OneChat.BLL.Interfaces
+{
     public interface IBot
     {
         public abstract string Name { get; }
-        public abstract string Execute(string message);
+        public abstract Task<string> ExecuteAsync(string message);
+
     }
 }

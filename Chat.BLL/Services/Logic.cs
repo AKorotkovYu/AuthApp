@@ -3,6 +3,7 @@ using OneChat.BLL.Interfaces;
 using OneChat.BLL.DTO;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace OneChat.BLL.Services
 {
@@ -20,27 +21,33 @@ namespace OneChat.BLL.Services
         public async Task Send(ChatMessageDTO chatMessageDTO)
         {
             await store.SaveMessage(chatMessageDTO);
-            await Task.Run(() => botAnswer(chatMessageDTO));
+            BotAnswer(chatMessageDTO);
         }
 
-        public void botAnswer(ChatMessageDTO chatMessageDTO)
+        public void BotAnswer(ChatMessageDTO chatMessageDTO)
         {
+
             var bots = serv.GetServices<IBot>();
+            var tasks = new List<Task>();
+
             foreach (var bot in bots)
             {
-                string answer = bot.Execute(chatMessageDTO.Message);
-                if (answer != null)
+                tasks.Add(bot.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
                 {
-                    store.SaveMessage(new()
-                    {
-                        ChatId = chatMessageDTO.ChatId,
-                        ChatName = chatMessageDTO.ChatName,
-                        Message = answer,
-                        Nickname = bot.Name,
-                        TimeOfPosting = System.DateTime.Now
-                    });
-                }
+                    if (!string.IsNullOrEmpty(task.Result))
+
+                        await store.SaveMessage(new()
+                        {
+                            ChatId = chatMessageDTO.ChatId,
+                            ChatName = chatMessageDTO.ChatName,
+                            Message = task.Result,
+                            Nickname = bot.Name,
+                            TimeOfPosting = System.DateTime.Now
+                        });
+                }));
             }
+
+            Task.WaitAny(tasks.ToArray());
         }
 
         public async Task DelMes(int chatId, int mesId)
@@ -75,7 +82,7 @@ namespace OneChat.BLL.Services
                 Nickname = "system",
                 TimeOfPosting = System.DateTime.Now
             });
-            store.AddUserToChat(id, newChat.Id);
+            await store.AddUserToChat(id, newChat.Id);
         }
     }
 }
