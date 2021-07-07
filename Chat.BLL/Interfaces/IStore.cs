@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using OneChat.DAL.EF;
 using OneChat.BLL.DTO;
 
 namespace OneChat.BLL.Interfaces

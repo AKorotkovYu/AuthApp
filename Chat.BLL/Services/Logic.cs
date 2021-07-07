@@ -18,39 +18,33 @@ namespace OneChat.BLL.Services
             this.serv = serv ?? throw new ArgumentNullException(nameof(serv));
         }
 
-        public async Task Send(ChatMessageDTO chatMessageDTO)
+        public async Task Send(ChatMessageDTO chatMessageDTO, IServiceScopeFactory serviceScopeFactory)
         {
-            await store.SaveMessage(chatMessageDTO);
-            BotAnswer(chatMessageDTO);
-        }
-
-        public void BotAnswer(ChatMessageDTO chatMessageDTO)
-        {
-
             var bots = serv.GetServices<IBot>();
             var tasks = new List<Task>();
 
+            await store.SaveMessage(chatMessageDTO);
             foreach (var bot in bots)
             {
                 tasks.Add(bot.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
                 {
+                    using var scope = serviceScopeFactory.CreateScope();
+                    var repository = scope.ServiceProvider.GetRequiredService<IStore>();
                     if (!string.IsNullOrEmpty(task.Result))
-
-                        await store.SaveMessage(new()
+                        await repository.SaveMessage(new()
                         {
                             ChatId = chatMessageDTO.ChatId,
                             ChatName = chatMessageDTO.ChatName,
                             Message = task.Result,
                             Nickname = bot.Name,
-                            TimeOfPosting = System.DateTime.Now
+                            TimeOfPosting = System.DateTime.Now,
                         });
                 }));
+                Task.WaitAny(tasks.ToArray());
             }
-
-            Task.WaitAny(tasks.ToArray());
         }
 
-        public async Task DelMes(int chatId, int mesId)
+            public async Task DelMes(int chatId, int mesId)
         {
             if(store.GetMessage(mesId).TimeOfPosting>DateTime.Now.AddDays(-1))
                 await store.RemoveMessage(mesId);

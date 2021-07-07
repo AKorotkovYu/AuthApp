@@ -38,6 +38,10 @@ namespace OneChat.WEB
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
             services.AddTransient<IBot, TimeBot>();
             services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
             services.AddTransient<IBot, DownloadBot>();
             services.AddTransient<ILogic, Logic>();
 

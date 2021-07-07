@@ -34,7 +34,7 @@ namespace OneChat.BLL.BusinessModel
 
         public string Execute(string message)
         {
-            Thread.Sleep(25000);
+            Thread.Sleep(5000);
             if (message != null)
             {
                 var splittedMessage = message.Split();
