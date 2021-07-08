@@ -36,13 +36,9 @@ namespace OneChat.WEB
             
             services.AddControllersWithViews();
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
-            services.AddTransient<IBot, TimeBot>();
-            services.AddTransient<IBot, JokeBot>();
-            services.AddTransient<IBot, JokeBot>();
-            services.AddTransient<IBot, JokeBot>();
-            services.AddTransient<IBot, JokeBot>();
-            services.AddTransient<IBot, JokeBot>();
-            services.AddTransient<IBot, DownloadBot>();
+
+            MyServiceCollection.AddConfig(services);//bots 
+
             services.AddTransient<ILogic, Logic>();
 
             services.AddTransient<IStore, Store>();

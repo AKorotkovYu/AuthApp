@@ -16,12 +16,10 @@ namespace OneChat.WEB.Controllers
         private readonly ILogic logic;
         private readonly IServiceScopeFactory serviceScopeFactory;
 
-        public ChatController(IStore store, ILogic logic,
-            [FromServices] IServiceScopeFactory serviceScopeFactory)
+        public ChatController(IStore store, ILogic logic)
         {
             this.logic = logic ?? throw new ArgumentNullException(nameof(logic));
             this.store = store ?? throw new ArgumentNullException(nameof(store));
-            this.serviceScopeFactory = serviceScopeFactory;
         }
 
         [Authorize]
@@ -44,7 +42,7 @@ namespace OneChat.WEB.Controllers
                     ChatName=model.ChatName,
                     Message=model.Message,
                     TimeOfPosting=DateTime.Now
-                }, serviceScopeFactory);
+                });
 
             return RedirectToAction("Index", "Chat", new { chatId = model.ChatId });
         }

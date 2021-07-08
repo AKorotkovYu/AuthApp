@@ -9,42 +9,28 @@ namespace OneChat.BLL.Services
 {
     public class Logic: ILogic
     {
-        private readonly IServiceProvider serv;
         private readonly IStore store;
 
-        public Logic(IServiceProvider serv, IStore store)
+        public delegate Task MethodContainer(ChatMessageDTO chatMessageDTO);
+        public event MethodContainer OnSend;
+
+
+        public Logic(IServiceProvider serviceProvider, IStore store)
         {
             this.store = store ?? throw new ArgumentNullException(nameof(store));
-            this.serv = serv ?? throw new ArgumentNullException(nameof(serv));
+                  
+            foreach (IBot bot in serviceProvider.GetServices<IBot>())
+                this.OnSend += bot.CheckMessage;
         }
 
-        public async Task Send(ChatMessageDTO chatMessageDTO, IServiceScopeFactory serviceScopeFactory)
+
+        public async Task Send(ChatMessageDTO chatMessageDTO)
         {
-            var bots = serv.GetServices<IBot>();
-            var tasks = new List<Task>();
-
             await store.SaveMessage(chatMessageDTO);
-            foreach (var bot in bots)
-            {
-                tasks.Add(bot.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
-                {
-                    using var scope = serviceScopeFactory.CreateScope();
-                    var repository = scope.ServiceProvider.GetRequiredService<IStore>();
-                    if (!string.IsNullOrEmpty(task.Result))
-                        await repository.SaveMessage(new()
-                        {
-                            ChatId = chatMessageDTO.ChatId,
-                            ChatName = chatMessageDTO.ChatName,
-                            Message = task.Result,
-                            Nickname = bot.Name,
-                            TimeOfPosting = System.DateTime.Now,
-                        });
-                }));
-                Task.WaitAny(tasks.ToArray());
-            }
+            await this.OnSend(chatMessageDTO);
         }
 
-            public async Task DelMes(int chatId, int mesId)
+        public async Task DelMes(int chatId, int mesId)
         {
             if(store.GetMessage(mesId).TimeOfPosting>DateTime.Now.AddDays(-1))
                 await store.RemoveMessage(mesId);

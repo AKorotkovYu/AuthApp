@@ -205,6 +205,7 @@ namespace OneChat.BLL.Services
                     TimeOfPosting = chatMessage.TimeOfPosting
                 });
             }
+
             return chatMessageDTOs;
         }
 
