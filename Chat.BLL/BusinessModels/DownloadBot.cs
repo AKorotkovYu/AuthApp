@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace OneChat.BLL.BusinessModel
 {
-    internal class DownloadBot : IBot
+    public class DownloadBot : IBot
     {
 
         IServiceScopeFactory serviceScopeFactory;
@@ -24,7 +24,7 @@ namespace OneChat.BLL.BusinessModel
                 await this.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
                 {
                     using var scope = serviceScopeFactory.CreateScope();
-                    var repository = scope.ServiceProvider.GetRequiredService<IStore>();
+                    var repository = scope.ServiceProvider.GetRequiredService<IBotStore>();
                     if (!string.IsNullOrEmpty(task.Result))
                         await repository.SaveMessage(new()
                         {

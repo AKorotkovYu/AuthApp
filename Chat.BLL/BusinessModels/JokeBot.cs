@@ -9,22 +9,21 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OneChat.BLL.BusinessModel
 {
-    internal class JokeBot : IBot
+    public class JokeBot : IBot
     {
         private readonly List<string> phrases = new();
         private readonly List<string> jokes = new();
         private readonly Random randomizer = new();
         List<Task> tasks;
 
-        IServiceScopeFactory serviceScopeFactory;
+        readonly IServiceProvider serviceProvider;
 
-        public JokeBot(IServiceScopeFactory serviceScopeFactory)
+        public JokeBot(IServiceProvider serviceProvider)
         {
             tasks = new List<Task>();
-            this.serviceScopeFactory = serviceScopeFactory;
+            this.serviceProvider = serviceProvider;
             phrases.Add("скучно");
             phrases.Add("грустно");
-
             jokes.Add("Шутка 1");
             jokes.Add("Шутка 2");
             jokes.Add("Шутка 3");
@@ -34,6 +33,7 @@ namespace OneChat.BLL.BusinessModel
             jokes.Add("Шутка 7");
             jokes.Add("Шутка 8");
             jokes.Add("Шутка 9");
+
         }
 
         public async Task CheckMessage(ChatMessageDTO chatMessageDTO)
@@ -41,21 +41,26 @@ namespace OneChat.BLL.BusinessModel
             tasks.Add(
                 await this.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
                 {
-                    using var scope = serviceScopeFactory.CreateScope();
-                    var repository = scope.ServiceProvider.GetRequiredService<IStore>();
-                    if (!string.IsNullOrEmpty(task.Result))
-                        await repository.SaveMessage(new()
-                        {
-                            ChatId = chatMessageDTO.ChatId,
-                            ChatName = chatMessageDTO.ChatName,
-                            Message = task.Result,
-                            Nickname = this.Name,
-                            TimeOfPosting = System.DateTime.Now,
-                        });
+                    try
+                    {
+                        var repository = serviceProvider.GetRequiredService<IBotStore>();
+                        if (!string.IsNullOrEmpty(task.Result))
+                            await repository.SaveMessage(new()
+                            {
+                                ChatId = chatMessageDTO.ChatId,
+                                ChatName = chatMessageDTO.ChatName,
+                                Message = task.Result,
+                                Nickname = $"{this.Name} {task.Id}",
+                                TimeOfPosting = System.DateTime.Now,
+                            });
+                    }
+                    catch (Exception e)
+                    {
+                        var e1=e;
+                    }
+                    
                 }));
         }
-
-
 
 
         public string Name => "Joker";

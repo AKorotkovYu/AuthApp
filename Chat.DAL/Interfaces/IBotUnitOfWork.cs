@@ -4,11 +4,9 @@ using OneChat.DAL.Entities;
 
 namespace OneChat.DAL.Interfaces
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IBotUnitOfWork : IDisposable
     {
-        IRepository<Chat> Chats { get; }
         IRepository<ChatMessage> ChatMessages { get; }
-        IRepository<User> Users { get; }
         Task Save();
     }
 }

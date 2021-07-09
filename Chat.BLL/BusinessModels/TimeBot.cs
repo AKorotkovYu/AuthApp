@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OneChat.BLL.BusinessModel
 {
-   internal class TimeBot : IBot
+   public class TimeBot : IBot
     {
         public string Name => "Timer";
 
@@ -25,7 +25,7 @@ namespace OneChat.BLL.BusinessModel
                 await this.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
                 {
                     using var scope = serviceScopeFactory.CreateScope();
-                    var repository = scope.ServiceProvider.GetRequiredService<IStore>();
+                    var repository = scope.ServiceProvider.GetRequiredService<IBotStore>();
                     if (!string.IsNullOrEmpty(task.Result))
                         await repository.SaveMessage(new()
                         {

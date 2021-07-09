@@ -3,7 +3,7 @@ using OneChat.BLL.DTO;
 
 namespace OneChat.BLL.Interfaces
 {
-    internal interface IBot
+    public interface IBot
     {
         public abstract string Name { get; }
         public abstract Task<string> ExecuteAsync(string message);

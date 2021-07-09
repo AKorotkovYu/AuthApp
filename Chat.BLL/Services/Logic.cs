@@ -4,6 +4,8 @@ using OneChat.BLL.DTO;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+
 
 namespace OneChat.BLL.Services
 {
@@ -15,14 +17,16 @@ namespace OneChat.BLL.Services
         public event MethodContainer OnSend;
 
 
-        public Logic(IServiceProvider serviceProvider, IStore store)
+        public Logic(IServiceProvider serviceProvider, IStore store, IConfiguration configuration)
         {
             this.store = store ?? throw new ArgumentNullException(nameof(store));
-                  
-            foreach (IBot bot in serviceProvider.GetServices<IBot>())
-                this.OnSend += bot.CheckMessage;
-        }
 
+            MyServiceCollection sc = new MyServiceCollection(configuration);
+            foreach (IBot bot in sc.AddConfig())
+                this.OnSend += bot.CheckMessage;
+
+
+        }
 
         public async Task Send(ChatMessageDTO chatMessageDTO)
         {

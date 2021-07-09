@@ -14,7 +14,6 @@ namespace OneChat.WEB.Controllers
     {
         private readonly IStore store;
         private readonly ILogic logic;
-        private readonly IServiceScopeFactory serviceScopeFactory;
 
         public ChatController(IStore store, ILogic logic)
         {

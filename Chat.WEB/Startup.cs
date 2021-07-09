@@ -1,6 +1,4 @@
-﻿
-using OneChat.BLL.BusinessModel;
-using OneChat.BLL.Interfaces;
+﻿using OneChat.BLL.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -36,12 +34,10 @@ namespace OneChat.WEB
             
             services.AddControllersWithViews();
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
-
-            MyServiceCollection.AddConfig(services);//bots 
-
+            services.AddTransient<IBotUnitOfWork, BotEFUnitOfWork>();
             services.AddTransient<ILogic, Logic>();
-
             services.AddTransient<IStore, Store>();
+            services.AddTransient<IBotStore, BotStore>();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -51,7 +47,6 @@ namespace OneChat.WEB
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.UseEndpoints(endpoints =>
             {
