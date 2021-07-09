@@ -9,6 +9,7 @@ namespace OneChat.DAL.Interfaces
         IRepository<Chat> Chats { get; }
         IRepository<ChatMessage> ChatMessages { get; }
         IRepository<User> Users { get; }
+        IRepository<ChatMessageFIFO> ChatMessagesFIFO { get; }
         Task Save();
     }
 }

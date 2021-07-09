@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using OneChat.BLL.DTO;
+using OneChat.DAL.Entities;
 
 namespace OneChat.BLL.Interfaces
 {
@@ -7,6 +7,6 @@ namespace OneChat.BLL.Interfaces
     {
         public abstract string Name { get; }
         public abstract Task<string> ExecuteAsync(string message);
-        public abstract Task CheckMessage(ChatMessageDTO chatMessageDTO);
+        public abstract Task CheckMessages(ChatMessageFIFO chatMessageFIFO);
     }
 }

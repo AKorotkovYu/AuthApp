@@ -1,6 +1,4 @@
 ﻿using OneChat.DAL.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
 using OneChat.BLL.Interfaces;
 using OneChat.BLL.DTO;
 using OneChat.DAL.Entities;

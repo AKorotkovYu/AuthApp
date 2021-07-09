@@ -4,7 +4,7 @@ using System.Linq;
 using OneChat.BLL.Interfaces;
 using System.Threading.Tasks;
 using System.Threading;
-using OneChat.BLL.DTO;
+using OneChat.DAL.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace OneChat.BLL.BusinessModel
@@ -14,14 +14,14 @@ namespace OneChat.BLL.BusinessModel
         private readonly List<string> phrases = new();
         private readonly List<string> jokes = new();
         private readonly Random randomizer = new();
-        List<Task> tasks;
 
-        readonly IServiceProvider serviceProvider;
+        private readonly IServiceProvider serviceProvider;
 
         public JokeBot(IServiceProvider serviceProvider)
         {
-            tasks = new List<Task>();
             this.serviceProvider = serviceProvider;
+
+
             phrases.Add("скучно");
             phrases.Add("грустно");
             jokes.Add("Шутка 1");
@@ -36,31 +36,27 @@ namespace OneChat.BLL.BusinessModel
 
         }
 
-        public async Task CheckMessage(ChatMessageDTO chatMessageDTO)
+
+
+        public async Task CheckMessages(ChatMessageFIFO chatMessage)
         {
-            tasks.Add(
-                await this.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
+            await this.ExecuteAsync(chatMessage.Message).ContinueWith(async (task) =>
+            {
+                var repository = serviceProvider.GetRequiredService<IBotStore>();
+                if (!string.IsNullOrEmpty(task.Result))
                 {
-                    try
+                    await repository.SaveMessage(new()
                     {
-                        var repository = serviceProvider.GetRequiredService<IBotStore>();
-                        if (!string.IsNullOrEmpty(task.Result))
-                            await repository.SaveMessage(new()
-                            {
-                                ChatId = chatMessageDTO.ChatId,
-                                ChatName = chatMessageDTO.ChatName,
-                                Message = task.Result,
-                                Nickname = $"{this.Name} {task.Id}",
-                                TimeOfPosting = System.DateTime.Now,
-                            });
-                    }
-                    catch (Exception e)
-                    {
-                        var e1=e;
-                    }
-                    
-                }));
+                        ChatId = chatMessage.ChatId,
+                        ChatName = chatMessage.ChatName,
+                        Message = task.Result,
+                        Nickname = $"{this.Name} {task.Id}",
+                        TimeOfPosting = System.DateTime.Now,
+                    });
+                }
+            });
         }
+
 
 
         public string Name => "Joker";
@@ -83,6 +79,8 @@ namespace OneChat.BLL.BusinessModel
             }
             return null;
         }
+
+
 
         string TakeRandAnswer(List<string> lAnswer)
         {

@@ -7,6 +7,7 @@ namespace OneChat.DAL.Interfaces
     public interface IBotUnitOfWork : IDisposable
     {
         IRepository<ChatMessage> ChatMessages { get; }
+        IRepository<ChatMessageFIFO> ChatMessagesFIFO { get; }
         Task Save();
     }
 }

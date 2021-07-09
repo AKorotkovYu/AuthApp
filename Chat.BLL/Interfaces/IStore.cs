@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using OneChat.BLL.DTO;
+using OneChat.DAL.Entities;
 
 namespace OneChat.BLL.Interfaces
 {
@@ -21,10 +22,13 @@ namespace OneChat.BLL.Interfaces
         
         public ChatMessageDTO GetMessage(int mesId);
         public Task SaveMessage(ChatMessageDTO messageDTO);
+
         public Task<List<ChatMessageDTO>> GetMessages(int chatId);
 
         public Task<ChatDTO> AddChat(ChatDTO chat);
         public Task RemoveChat(int chatId);
         public Task RemoveMessage(int messageId);
+        public Task RemoveMessageFIFO();
+        public ChatMessageFIFO GetMessageFIFO();
     }
 }

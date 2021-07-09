@@ -2,7 +2,7 @@
 using OneChat.BLL.Interfaces;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using OneChat.BLL.DTO;
+using OneChat.DAL.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace OneChat.BLL.BusinessModel
@@ -11,38 +11,45 @@ namespace OneChat.BLL.BusinessModel
     {
         public string Name => "Timer";
 
-        IServiceScopeFactory serviceScopeFactory;
+        readonly IServiceProvider serviceProvider;
+        readonly IBotStore BotStore;
+        List<Task> tasks;
 
-        public TimeBot(IServiceScopeFactory serviceScopeFactory)
+
+
+        public TimeBot(IServiceProvider serviceProvider)
         {
-            this.serviceScopeFactory = serviceScopeFactory;
+            BotStore = serviceProvider.GetRequiredService<IBotStore>();
+            tasks = new List<Task>();
         }
 
-        public async Task CheckMessage(ChatMessageDTO chatMessageDTO)
+
+
+        public async Task CheckMessages(ChatMessageFIFO chatMessage)
         {
-            var tasks = new List<Task>
+            await this.ExecuteAsync(chatMessage.Message).ContinueWith(async (task) =>
             {
-                await this.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
-                {
-                    using var scope = serviceScopeFactory.CreateScope();
-                    var repository = scope.ServiceProvider.GetRequiredService<IBotStore>();
-                    if (!string.IsNullOrEmpty(task.Result))
-                        await repository.SaveMessage(new()
-                        {
-                            ChatId = chatMessageDTO.ChatId,
-                            ChatName = chatMessageDTO.ChatName,
-                            Message = task.Result,
-                            Nickname = this.Name,
-                            TimeOfPosting = System.DateTime.Now,
-                        });
-                })
-            };
+                var repository = serviceProvider.GetRequiredService<IBotStore>();
+                if (!string.IsNullOrEmpty(task.Result))
+                    await repository.SaveMessage(new()
+                    {
+                        ChatId = chatMessage.ChatId,
+                        ChatName = chatMessage.ChatName,
+                        Message = task.Result,
+                        Nickname = this.Name,
+                        TimeOfPosting = System.DateTime.Now,
+                    });
+            });
         }
+
+
 
         public async Task<string> ExecuteAsync(string message)
         {
             return await Task.Run(() => Execute(message));
         }
+
+
 
         public string Execute(string message)
         {

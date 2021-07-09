@@ -13,6 +13,7 @@ namespace OneChat.DAL.Repositories
         private UserRepository userRepository;
         private ChatMessageRepository chatMessageRepository;
         private ChatRepository chatRepository;
+        private ChatMessageFIFORepository chatMessageFIFORepository;
 
         public EFUnitOfWork(DbContextOptions<OperatorContext> options)
         {
@@ -45,6 +46,16 @@ namespace OneChat.DAL.Repositories
                 if (chatMessageRepository == null)
                     chatMessageRepository = new ChatMessageRepository(db);
                 return chatMessageRepository;
+            }
+        }
+
+        public IRepository<ChatMessageFIFO> ChatMessagesFIFO
+        {
+            get
+            {
+                if (chatMessageFIFORepository == null)
+                    chatMessageFIFORepository = new ChatMessageFIFORepository(db);
+                return chatMessageFIFORepository;
             }
         }
 

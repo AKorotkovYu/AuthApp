@@ -6,6 +6,7 @@ namespace OneChat.DAL.EF
     public class BotOperatorContext : DbContext
     {
         public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<ChatMessageFIFO> ChatMessagesFIFO { get; set; }
 
         public BotOperatorContext(DbContextOptions<OperatorContext> options)
             : base(options)

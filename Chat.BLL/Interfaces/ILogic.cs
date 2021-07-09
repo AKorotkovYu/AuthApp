@@ -10,5 +10,6 @@ namespace OneChat.BLL.Interfaces
         public Task DelMes(int chatId, int mesId);
         public Task Exit(int userId, int chatId);
         public Task CreateChat(int id, ChatDTO chatModel);
+        public Task CheckFIFOAsync();
     }
 }

@@ -1,49 +1,52 @@
-﻿using OneChat.BLL.Interfaces;
-using System.Threading.Tasks;
-using OneChat.BLL.DTO;
-using Microsoft.Extensions.DependencyInjection;
+﻿using System;
 using System.Collections.Generic;
-
+using OneChat.BLL.Interfaces;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using OneChat.DAL.Entities;
 
 namespace OneChat.BLL.BusinessModel
 {
     public class DownloadBot : IBot
     {
+        private readonly IServiceProvider serviceProvider;
 
-        IServiceScopeFactory serviceScopeFactory;
 
-        public DownloadBot(IServiceScopeFactory serviceScopeFactory)
+
+        public DownloadBot(IServiceProvider serviceProvider)
         {
-            this.serviceScopeFactory = serviceScopeFactory;
+            this.serviceProvider = serviceProvider;
         }
 
-        public async Task CheckMessage(ChatMessageDTO chatMessageDTO)
+
+
+        public async Task CheckMessages(ChatMessageFIFO chatMessage)
         {
-            var tasks = new List<Task>
+            await this.ExecuteAsync(chatMessage.Message).ContinueWith(async (task) =>
             {
-                await this.ExecuteAsync(chatMessageDTO.Message).ContinueWith(async (task) =>
-                {
-                    using var scope = serviceScopeFactory.CreateScope();
-                    var repository = scope.ServiceProvider.GetRequiredService<IBotStore>();
-                    if (!string.IsNullOrEmpty(task.Result))
-                        await repository.SaveMessage(new()
-                        {
-                            ChatId = chatMessageDTO.ChatId,
-                            ChatName = chatMessageDTO.ChatName,
-                            Message = task.Result,
-                            Nickname = this.Name,
-                            TimeOfPosting = System.DateTime.Now,
-                        });
-                })
-            };
+                var repository = serviceProvider.GetRequiredService<IBotStore>();
+                if (!string.IsNullOrEmpty(task.Result))
+                    await repository.SaveMessage(new()
+                    {
+                        ChatId = chatMessage.ChatId,
+                        ChatName = chatMessage.ChatName,
+                        Message = task.Result,
+                        Nickname = this.Name,
+                        TimeOfPosting = System.DateTime.Now,
+                    });
+            });
         }
 
         public string Name => "Downloader";
+
+
 
         public async Task<string> ExecuteAsync(string message)
         {
             return await Task.Run(() => Execute(message));
         }
+
+
 
         public string Execute(string message)
         {

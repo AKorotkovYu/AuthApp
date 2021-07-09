@@ -24,7 +24,8 @@ namespace OneChat.WEB.Controllers
         [Authorize]
         public async Task<IActionResult> Index(int chatId)
         {
-             return  View(await store.GetMessages(chatId));
+            
+            return  View(await store.GetMessages(chatId));
         }
 
         [Authorize]
@@ -43,6 +44,7 @@ namespace OneChat.WEB.Controllers
                     TimeOfPosting=DateTime.Now
                 });
 
+            await logic.CheckFIFOAsync();
             return RedirectToAction("Index", "Chat", new { chatId = model.ChatId });
         }
 
