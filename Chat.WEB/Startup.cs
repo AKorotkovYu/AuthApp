@@ -26,7 +26,7 @@ namespace OneChat.WEB
         public void ConfigureServices(IServiceCollection services)
         {
 
-            string connection = Configuration.GetConnectionString("DefaultConnection");
+            string connection = Configuration.GetConnectionString("DefaultConnection"); 
             
             services.AddDbContextFactory<OperatorContext>(options => options.UseSqlServer(connection));
 
