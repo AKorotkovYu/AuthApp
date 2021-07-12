@@ -8,6 +8,7 @@ using OneChat.DAL.EF;
 using OneChat.DAL.Interfaces;
 using OneChat.DAL.Repositories;
 using OneChat.BLL.Services;
+using OneChat.WEB.HostedServices;
 
 namespace OneChat.WEB
 {

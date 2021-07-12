@@ -30,6 +30,11 @@ namespace OneChat.BLL.Services
             services.AddDbContext<OperatorContext>(options => options.UseSqlServer(connection));
             services.AddTransient<IBot, TimeBot>();
             services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, JokeBot>();
             services.AddTransient<IBot, DownloadBot>();
             services.AddTransient<IBotUnitOfWork, BotEFUnitOfWork>();
             services.AddTransient<IBotStore, BotStore>();
