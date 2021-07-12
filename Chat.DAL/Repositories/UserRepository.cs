@@ -19,12 +19,16 @@ namespace OneChat.DAL.Repositories
 
         public IEnumerable<User> GetAll()
         {
-            return db.Users.Include(c=>c.Chats);
+            return db.Users
+                .Include(c=>c.Chats);
         }
 
         public User Get(int id)
         {
-            return db.Users.Include(c=>c.Chats).Where(c=>c.Id==id).First();
+            return db.Users
+                .Include(c=>c.Chats)
+                .Where(c=>c.Id==id)
+                .First();
         }
 
         public void Create(User user)
@@ -39,7 +43,9 @@ namespace OneChat.DAL.Repositories
 
         public IEnumerable<User> Find(Func<User, Boolean> predicate)
         {
-            return db.Users.Include(c=>c.Chats).Where(predicate).ToList();
+            return db.Users
+                .Include(c=>c.Chats)
+                .Where(predicate).ToList();
         }
 
         public void Delete(int id)

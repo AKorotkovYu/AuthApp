@@ -20,17 +20,20 @@ namespace OneChat.WEB
 
         public IConfiguration Configuration { get; }
 
+
+
         public void ConfigureServices(IServiceCollection services)
         {
+
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<OperatorContext>(options => options.UseSqlServer(connection));
+            
+            services.AddDbContextFactory<OperatorContext>(options => options.UseSqlServer(connection));
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 });
-
             
             services.AddControllersWithViews();
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
@@ -38,7 +41,12 @@ namespace OneChat.WEB
             services.AddTransient<ILogic, Logic>();
             services.AddTransient<IStore, Store>();
             services.AddTransient<IBotStore, BotStore>();
+
+            services.AddHostedService<BotHostedService>();
+
         }
+
+
 
         public void Configure(IApplicationBuilder app)
         {

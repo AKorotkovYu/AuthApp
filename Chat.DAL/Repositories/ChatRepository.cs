@@ -19,12 +19,16 @@ namespace OneChat.DAL.Repositories
 
         public IEnumerable<Chat> GetAll()
         {
-            return db.Chats.Include(c=>c.ChatUsers);
+            return db.Chats
+                .Include(c=>c.ChatUsers);
         }
 
         public Chat Get(int id)
         {
-            return db.Chats.Include(c=>c.ChatUsers).Where(c=>c.Id==id).First();
+            return db.Chats
+                .Include(c=>c.ChatUsers)
+                .Where(c=>c.Id==id)
+                .First();
         }
 
         public void Create(Chat chat)
@@ -39,14 +43,18 @@ namespace OneChat.DAL.Repositories
 
         public IEnumerable<Chat> Find(Func<Chat, Boolean> predicate)
         {
-            return db.Chats.Where(predicate).ToList();
+            return db.Chats
+                .Where(predicate)
+                .ToList();
         }
 
         public void Delete(int id)
         {
-            Chat chat = db.Chats.Find(id);
+            Chat chat = db.Chats
+                .Find(id);
             if (chat != null)
-                db.Chats.Remove(chat);
+                db.Chats
+                    .Remove(chat);
         }
     }
 }

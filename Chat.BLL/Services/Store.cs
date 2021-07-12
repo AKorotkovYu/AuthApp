@@ -28,7 +28,13 @@ namespace OneChat.BLL.Services
             if (user == null)
                 return null;
             else 
-                return new UserDTO { Chats = user.Chats, DateOfRegistration = user.DateOfRegistration, Email = user.Email, Id = user.Id, Nickname = user.Nickname };
+                return new UserDTO { 
+                    Chats = user.Chats, 
+                    DateOfRegistration = user.DateOfRegistration, 
+                    Email = user.Email, 
+                    Id = user.Id, 
+                    Nickname = user.Nickname 
+                };
         }
 
 
@@ -39,17 +45,48 @@ namespace OneChat.BLL.Services
             if (user == null)
                 return null;
             else
-                return new UserDTO { Chats = user.Chats, DateOfRegistration = user.DateOfRegistration, Email = user.Email, Id = user.Id, Nickname = user.Nickname };
+                return new UserDTO { 
+                    Chats = user.Chats, 
+                    DateOfRegistration = user.DateOfRegistration, 
+                    Email = user.Email, 
+                    Id = user.Id, 
+                    Nickname = user.Nickname 
+                };
         }
 
 
 
         public async Task<UserDTO> AddNewUser(UserDTO userDTO)
         {
-            User user = new() { Nickname = userDTO.Nickname, Chats = userDTO.Chats, DateOfRegistration = DateTime.Now, Email = userDTO.Email, Password = userDTO.Password };
-            Database.Users.Create(user);
-            await Database.Save();
-            return new UserDTO { Id = user.Id, Chats = user.Chats, DateOfRegistration = user.DateOfRegistration, Email = user.Email, Nickname = user.Nickname};
+            User user = new() { 
+                Nickname = userDTO.Nickname, 
+                Chats = userDTO.Chats, 
+                DateOfRegistration = DateTime.Now, 
+                Email = userDTO.Email, 
+                Password = userDTO.Password 
+            };
+
+            if (user != null)
+            {
+                return null;
+
+            }
+            else
+            {
+
+                Database.Users.Create(user);
+                await Database.Save();
+
+                return new UserDTO
+                {
+                    Id = user.Id,
+                    Chats = user.Chats,
+                    DateOfRegistration = user.DateOfRegistration,
+                    Email = user.Email,
+                    Nickname = user.Nickname
+                };
+
+            }
         }
 
 
@@ -59,27 +96,42 @@ namespace OneChat.BLL.Services
             User user = Database.Users.Get(userId);
             Chat chat = Database.Chats.Get(chatId);
 
-            chat.ChatUsers.Add(user);
-            user.Chats.Add(chat);
+            if (chat != null | user != null)
+            {
+                chat.ChatUsers.Add(user);
+                user.Chats.Add(chat);
 
-            Database.Chats.Get(chatId).ChatUsers.Add(user);
-            Database.Users.Get(userId).Chats.Add(chat);
-            await Database.Save();
+                Database.Chats.Get(chatId).ChatUsers.Add(user);
+                Database.Users.Get(userId).Chats.Add(chat);
+                await Database.Save();
+            }
         }
 
 
 
         public async Task DelUserFromChat(int userId, int chatId)
         { 
-            User user = Database.Users.GetAll().Where(c => c.Id == userId).First();
-            Chat chat = Database.Chats.GetAll().Where(c => c.Id == chatId).First();
-            chat.ChatUsers.Remove(user);
-            if(chat.AdminId==user.Id)
+            User user = Database.Users
+                .GetAll()
+                .First(c => c.Id == userId);
+
+
+            Chat chat = Database.Chats
+                .GetAll()
+                .First(c => c.Id == chatId);
+
+            if (chat != null | user != null)
             {
-                chat.AdminId = chat.ChatUsers.First().Id;
+                chat.ChatUsers.Remove(user);
+
+                if (chat.AdminId == user.Id)
+                {
+                    chat.AdminId = chat.ChatUsers.First().Id;
+                }
+
+                user.Chats.Remove(chat);
+                await Database.Save();
             }
-            user.Chats.Remove(chat);
-            await Database.Save();
         }
 
 
@@ -88,7 +140,13 @@ namespace OneChat.BLL.Services
         {
             var mapper = new MapperConfiguration(cfg => cfg.CreateMap<User, UserDTO>()).CreateMapper();
             Dictionary<User, int> users = new();
-            Chat chat = Database.Chats.GetAll().Where(c => c.Id == chatId).First();
+            Chat chat = Database.Chats
+                .GetAll()
+                .First(c => c.Id == chatId);
+
+            if (chat == null)
+                return null;
+
             foreach (User user in Database.Users.GetAll())
             {
                 if (user.Chats.Find(c => c.Id == chat.Id) == null)
@@ -106,6 +164,10 @@ namespace OneChat.BLL.Services
             foreach(var chat in Database.Users.Get(userId).Chats)
             {
                 Chat fullChat=Database.Chats.Get(chat.Id);
+                
+                if (fullChat == null)
+                    return null;
+
                 chatsDTO.Add(new()
                 {
                     ChatMessages = chat.ChatMessages,
@@ -122,43 +184,52 @@ namespace OneChat.BLL.Services
 
         public async Task SaveMessage(ChatMessageDTO messageDTO)
         {
-            ChatMessage message = new() { 
-                Id = messageDTO.Id, 
-                IsOld = messageDTO.isOld, 
-                ChatId = messageDTO.ChatId, 
-                Message = messageDTO.Message, 
-                Nickname = messageDTO.Nickname, 
-                ChatName = messageDTO.ChatName,  
-                TimeOfPosting = messageDTO.TimeOfPosting 
-            };
-            Database.ChatMessages.Create(message);
-            await SaveMessageToQueue(messageDTO);
-            await Database.Save();
-            
+            if (messageDTO != null)
+            {
+                ChatMessage message = new()
+                {
+                    Id = messageDTO.Id,
+                    IsOld = messageDTO.isOld,
+                    ChatId = messageDTO.ChatId,
+                    Message = messageDTO.Message,
+                    Nickname = messageDTO.Nickname,
+                    ChatName = messageDTO.ChatName,
+                    TimeOfPosting = messageDTO.TimeOfPosting
+                };
+                Database.ChatMessages.Create(message);
+                await SaveMessageToQueue(messageDTO);
+                await Database.Save();
+            }
         }
 
 
 
         public async Task SaveMessageToQueue(ChatMessageDTO messageDTO)
         {
-            ChatMessageFIFO message = new()
+            if (messageDTO != null)
             {
-                Id = messageDTO.Id,
-                ChatId = messageDTO.ChatId,
-                Message = messageDTO.Message,
-                Nickname = messageDTO.Nickname,
-                ChatName = messageDTO.ChatName,
-            };
-            Database.ChatMessagesFIFO.Create(message);
-            await Database.Save();
+                ChatMessageFIFO message = new()
+                {
+                    Id = messageDTO.Id,
+                    ChatId = messageDTO.ChatId,
+                    Message = messageDTO.Message,
+                    Nickname = messageDTO.Nickname,
+                    ChatName = messageDTO.ChatName,
+                };
+                Database.ChatMessagesFIFO.Create(message);
+                await Database.Save();
+            }
         }
 
 
 
         public async Task RemoveMessage(int messageId)
         {
-            Database.ChatMessages.Delete(messageId);
-           await Database.Save();
+            if (messageId!=0)
+            {
+                Database.ChatMessages.Delete(messageId);
+                await Database.Save();
+            }
         }
 
 
@@ -166,14 +237,20 @@ namespace OneChat.BLL.Services
 
         public ChatMessageFIFO GetMessageFIFO()
         {
-            return Database.ChatMessagesFIFO.GetAll().FirstOrDefault();
+            return Database.ChatMessagesFIFO
+                .GetAll()
+                .FirstOrDefault();
         }
 
 
 
         public async Task RemoveMessageFIFO()
         {
-            ChatMessageFIFO firstMesFIFO = Database.ChatMessagesFIFO.GetAll().FirstOrDefault();
+            ChatMessageFIFO firstMesFIFO = Database.ChatMessagesFIFO
+                .GetAll()
+                .FirstOrDefault();
+
+
             if (firstMesFIFO != null)
                 Database.ChatMessagesFIFO.Delete(firstMesFIFO.Id);
             await Database.Save();
@@ -183,6 +260,8 @@ namespace OneChat.BLL.Services
 
         public async Task<ChatDTO> AddChat(ChatDTO chatDTO)
         {
+            if (chatDTO == null)
+                return null;
             Chat chat = new(){ 
                 AdminId=chatDTO.AdminId, 
                 ChatName=chatDTO.ChatName, 
@@ -207,7 +286,7 @@ namespace OneChat.BLL.Services
         public async Task RemoveChat(int chatId)
         {
             Chat chat = Database.Chats.Get(chatId);
-            foreach(User user in Database.Users.GetAll())
+            foreach (User user in Database.Users.GetAll())
             {
                 user.Chats.Remove(chat);
             }
@@ -219,7 +298,11 @@ namespace OneChat.BLL.Services
 
         public ChatMessageDTO GetMessage(int mesId)
         {
-            ChatMessage chatMessage = Database.ChatMessages.GetAll().FirstOrDefault(x => x.Id == mesId);
+            ChatMessage chatMessage = Database.ChatMessages
+                .GetAll()
+                .FirstOrDefault(x => x.Id == mesId);
+            if (chatMessage == null)
+                return null;
             return new()
             {
                 Id = chatMessage.Id,
@@ -244,7 +327,10 @@ namespace OneChat.BLL.Services
                     chatMessage.IsOld = false;
             }
             await Database.Save();
-            return Database.ChatMessages.GetAll().Where(c => c.ChatId == chatId).ToList();
+            return Database.ChatMessages
+                .GetAll()
+                .Where(c => c.ChatId == chatId)
+                .ToList();
         }
 
 
@@ -277,6 +363,8 @@ namespace OneChat.BLL.Services
         public UserDTO GetUser(int userId)
         {
             User user = Database.Users.Get(userId);
+            if (user == null)
+                return null;
             return new UserDTO {
                 Id=user.Id,
                 Email=user.Email, 
@@ -291,6 +379,8 @@ namespace OneChat.BLL.Services
         public ChatDTO GetChat(int chatId)
         {
             Chat chat = Database.Chats.Get(chatId);
+            if (chat == null)
+                return null;
             return new ChatDTO { AdminId = chat.AdminId, ChatName = chat.ChatName, Id=chat.Id};
         }
     }

@@ -21,7 +21,6 @@ namespace OneChat.BLL.BusinessModel
         {
             this.serviceProvider = serviceProvider;
 
-
             phrases.Add("скучно");
             phrases.Add("грустно");
             jokes.Add("Шутка 1");
@@ -79,7 +78,6 @@ namespace OneChat.BLL.BusinessModel
             }
             return null;
         }
-
 
 
         string TakeRandAnswer(List<string> lAnswer)

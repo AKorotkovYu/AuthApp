@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using OneChat.DAL.EF;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace OneChat.BLL.Services
 {
     public class MyServiceCollection
     {
@@ -27,9 +28,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<OperatorContext>(options => options.UseSqlServer(connection));
-            services.AddSingleton<IBot, TimeBot>();
-            services.AddSingleton<IBot, JokeBot>();
-            services.AddSingleton<IBot, DownloadBot>();
+            services.AddTransient<IBot, TimeBot>();
+            services.AddTransient<IBot, JokeBot>();
+            services.AddTransient<IBot, DownloadBot>();
             services.AddTransient<IBotUnitOfWork, BotEFUnitOfWork>();
             services.AddTransient<IBotStore, BotStore>();
 

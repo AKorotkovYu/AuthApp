@@ -13,6 +13,8 @@ namespace OneChat.BLL.Services
 {
     public class Logic: ILogic
     {
+
+
         private readonly IStore store;
         private readonly List<IBot> bots;
         private readonly List<Task> tasks;
@@ -47,7 +49,7 @@ namespace OneChat.BLL.Services
                     tasks.Add(bot.CheckMessages(chatMessageFIFO));
                 }
 
-                Task.WaitAny(tasks.ToArray());
+                Task.WaitAll(tasks.ToArray());
                 tasks.Clear();
 
                 await store.RemoveMessageFIFO();
@@ -77,24 +79,27 @@ namespace OneChat.BLL.Services
         {
             UserDTO userDTO = store.GetUser(id);
 
-            ChatDTO newChat = new()
+            if (userDTO != null)
             {
-                ChatName = chatDTO.ChatName,
-                AdminId = userDTO.Id,
-                ChatMessages = new()
-            };
+                ChatDTO newChat = new()
+                {
+                    ChatName = chatDTO.ChatName,
+                    AdminId = userDTO.Id,
+                    ChatMessages = new()
+                };
 
-            newChat = await store.AddChat(newChat);
+                newChat = await store.AddChat(newChat);
 
-            newChat.ChatMessages.Add(new()
-            {
-                ChatId = newChat.Id,
-                ChatName = newChat.ChatName,
-                Message = "чат создан",
-                Nickname = "system",
-                TimeOfPosting = System.DateTime.Now
-            });
-            await store.AddUserToChat(id, newChat.Id);
+                newChat.ChatMessages.Add(new()
+                {
+                    ChatId = newChat.Id,
+                    ChatName = newChat.ChatName,
+                    Message = "чат создан",
+                    Nickname = "system",
+                    TimeOfPosting = System.DateTime.Now
+                });
+                await store.AddUserToChat(id, newChat.Id);
+            }
         }
     }
 }

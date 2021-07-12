@@ -3,6 +3,7 @@ using OneChat.BLL.Interfaces;
 using OneChat.BLL.DTO;
 using OneChat.DAL.Entities;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace OneChat.BLL.Services
 {
