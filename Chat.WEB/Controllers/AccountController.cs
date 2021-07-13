@@ -60,6 +60,7 @@ namespace OneChat.WEB.Controllers
                 if (userObject == null)
                 {
                     await store.AddNewUser(new UserDTO { Email = model.Email, Nickname = model.Nickname, Password = model.Password });
+                    
                     userObject = store.GetUser(model.Email);
                     await Authenticate(userObject.Id); // аутентификация
                     return RedirectToAction("Index", "Home");
@@ -69,6 +70,7 @@ namespace OneChat.WEB.Controllers
             }
             return View(model);
         }
+
 
         private async Task Authenticate(int userName)
         {

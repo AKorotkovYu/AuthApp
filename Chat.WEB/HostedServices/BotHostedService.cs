@@ -17,7 +17,6 @@ namespace OneChat.WEB.HostedServices
         private readonly IStore store;
         private readonly List<IBot> bots;
         private readonly List<Task> tasks;
-        private int tasksCount = 0;
         private IConfiguration AppConfiguration { get; set; }
 
         public BotHostedService(IStore store, IConfiguration configuration, IConfiguration conf)
@@ -53,37 +52,34 @@ namespace OneChat.WEB.HostedServices
         /// <returns></returns>
         private async Task CheckFIFOAsync()
         {
-            
-            var MaxThreads = Int32.Parse(AppConfiguration["BotsSettings:WorkerThread"]);
-            ChatMessageFIFO chatMessageFIFO = store.GetMessageFIFO();
-            
-            while(chatMessageFIFO!=null)
-            {
-                foreach(var bot in bots)
-                {
-                    if (tasksCount < MaxThreads)
-                    {             
-                        tasks.Add(bot.CheckMessages(chatMessageFIFO));
-                        tasksCount++;
-                    }
 
-                    if(tasksCount == MaxThreads)
+            var MaxThreads = Int32.Parse(AppConfiguration["BotsSettings:WorkerThread"]);
+
+            List<ChatMessageFIFO> listFIFO = store.GetAllMessagesFIFO();
+
+            foreach (var chatMessageFIFO in listFIFO)
+            {
+                foreach (var bot in bots)
+                {
+                    if (tasks.Count < MaxThreads)
+                    {
+                        tasks.Add(bot.CheckMessages(chatMessageFIFO));
+                    }
+                    else
                     {
                         Task.WaitAny(tasks.ToArray());
                         tasks.Remove(tasks.First(c => c.IsCompleted == true));
                         tasks.Add(bot.CheckMessages(chatMessageFIFO));
                     }
                 }
-
-
-                //Дожидаемся всех чтобы перейти к следующему сообщению
-                Task.WaitAll(tasks.ToArray());
-                tasksCount = 0;
-                tasks.Clear();
-
-                await store.RemoveMessageFIFO();
-                chatMessageFIFO = store.GetMessageFIFO();
             }
+
+            //Дожидаемся всех чтобы перейти к следующему сообщению
+            Task.WaitAll(tasks.ToArray());
+            tasks.Clear();
+
+            foreach (var chatMessageFIFO in listFIFO)
+                await store.RemoveMessageFIFO();
         }
     }
 }

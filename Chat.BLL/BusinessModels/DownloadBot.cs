@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using OneChat.BLL.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,20 +6,16 @@ using OneChat.DAL.Entities;
 
 namespace OneChat.BLL.BusinessModel
 {
-    public class DownloadBot : IBot
+    public class DownloadBot : Bot
     {
         private readonly IServiceProvider serviceProvider;
-
-
 
         public DownloadBot(IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
         }
 
-
-
-        public async Task CheckMessages(ChatMessageFIFO chatMessage)
+        public override async Task CheckMessages(ChatMessageFIFO chatMessage)
         {
             await this.ExecuteAsync(chatMessage.Message).ContinueWith(async (task) =>
             {
@@ -37,18 +32,17 @@ namespace OneChat.BLL.BusinessModel
             });
         }
 
-        public string Name => "Downloader";
+        public override string Name => "Downloader";
 
 
 
-        public async Task<string> ExecuteAsync(string message)
+        public override async Task<string> ExecuteAsync(string message)
         {
             return await Task.Run(() => Execute(message));
         }
 
 
-
-        public string Execute(string message)
+        public static string Execute(string message)
         {
             if (message == @"/download")
             {

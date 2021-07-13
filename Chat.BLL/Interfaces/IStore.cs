@@ -30,5 +30,7 @@ namespace OneChat.BLL.Interfaces
         public Task RemoveMessage(int messageId);
         public Task RemoveMessageFIFO();
         public ChatMessageFIFO GetMessageFIFO();
+        public List<ChatMessageFIFO> GetAllMessagesFIFO();
+        public Task RemoveMessageFIFO(int messageId);
     }
 }

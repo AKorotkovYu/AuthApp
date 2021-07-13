@@ -5,8 +5,8 @@ namespace OneChat.BLL.Interfaces
 {
     public interface IBot
     {
-        public abstract string Name { get; }
-        public abstract Task<string> ExecuteAsync(string message);
-        public abstract Task CheckMessages(ChatMessageFIFO chatMessageFIFO);
+        public string Name { get; }
+        public Task<string> ExecuteAsync(string message);
+        public Task CheckMessages(ChatMessageFIFO chatMessageFIFO);
     }
 }

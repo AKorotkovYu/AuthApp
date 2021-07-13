@@ -7,44 +7,38 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OneChat.BLL.BusinessModel
 {
-   public class TimeBot : IBot
+   public class TimeBot : Bot
     {
-        public string Name => "Timer";
-
-        readonly IServiceProvider serviceProvider;
-        readonly IBotStore BotStore;
-        List<Task> tasks;
-
-
+        
+        private readonly IServiceProvider serviceProvider;
 
         public TimeBot(IServiceProvider serviceProvider)
         {
-            BotStore = serviceProvider.GetRequiredService<IBotStore>();
-            tasks = new List<Task>();
+            this.serviceProvider = serviceProvider;
         }
 
-
-
-        public async Task CheckMessages(ChatMessageFIFO chatMessage)
+        public override async Task CheckMessages(ChatMessageFIFO chatMessage)
         {
             await this.ExecuteAsync(chatMessage.Message).ContinueWith(async (task) =>
             {
                 var repository = serviceProvider.GetRequiredService<IBotStore>();
                 if (!string.IsNullOrEmpty(task.Result))
+                {
                     await repository.SaveMessage(new()
                     {
                         ChatId = chatMessage.ChatId,
                         ChatName = chatMessage.ChatName,
                         Message = task.Result,
-                        Nickname = this.Name,
+                        Nickname = $"{this.Name} {task.Id}",
                         TimeOfPosting = System.DateTime.Now,
                     });
+                }
             });
         }
 
+        public override string Name => "Timer";
 
-
-        public async Task<string> ExecuteAsync(string message)
+        public override async Task<string> ExecuteAsync(string message)
         {
             return await Task.Run(() => Execute(message));
         }

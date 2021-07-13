@@ -65,28 +65,19 @@ namespace OneChat.BLL.Services
                 Email = userDTO.Email, 
                 Password = userDTO.Password 
             };
+            
+            
+            Database.Users.Create(user);
+            await Database.Save();
 
-            if (user != null)
-            {
-                return null;
 
-            }
-            else
-            {
-
-                Database.Users.Create(user);
-                await Database.Save();
-
-                return new UserDTO
-                {
-                    Id = user.Id,
-                    Chats = user.Chats,
-                    DateOfRegistration = user.DateOfRegistration,
-                    Email = user.Email,
-                    Nickname = user.Nickname
-                };
-
-            }
+            return new UserDTO { 
+                Id = user.Id, 
+                Chats = user.Chats, 
+                DateOfRegistration = user.DateOfRegistration, 
+                Email = user.Email, 
+                Nickname = user.Nickname 
+            };
         }
 
 
@@ -242,6 +233,11 @@ namespace OneChat.BLL.Services
                 .FirstOrDefault();
         }
 
+        public List<ChatMessageFIFO> GetAllMessagesFIFO()
+        {
+            return Database.ChatMessagesFIFO
+                .GetAll().ToList();
+        }
 
 
         public async Task RemoveMessageFIFO()
@@ -254,6 +250,16 @@ namespace OneChat.BLL.Services
             if (firstMesFIFO != null)
                 Database.ChatMessagesFIFO.Delete(firstMesFIFO.Id);
             await Database.Save();
+        }
+
+
+        public async Task RemoveMessageFIFO(int messageId)
+        {
+            if (messageId != 0)
+            {
+                Database.ChatMessagesFIFO.Delete(messageId);
+                await Database.Save();
+            }
         }
 
 

@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OneChat.BLL.BusinessModel
 {
-    public class JokeBot : IBot
+    public class JokeBot : Bot
     {
         private readonly List<string> phrases = new();
         private readonly List<string> jokes = new();
@@ -36,8 +36,11 @@ namespace OneChat.BLL.BusinessModel
         }
 
 
+        public override string Name => "Joker";
+        public int BotID;
 
-        public async Task CheckMessages(ChatMessageFIFO chatMessage)
+
+        public override async Task CheckMessages(ChatMessageFIFO chatMessage)
         {
             await this.ExecuteAsync(chatMessage.Message).ContinueWith(async (task) =>
             {
@@ -58,9 +61,9 @@ namespace OneChat.BLL.BusinessModel
 
 
 
-        public string Name => "Joker";
+        
 
-        public Task<string> ExecuteAsync(string message) => Task.Run(() => Execute(message));
+        public override Task<string> ExecuteAsync(string message) => Task.Run(() => Execute(message));
 
         public string Execute(string message)
         {
