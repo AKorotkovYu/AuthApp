@@ -9,7 +9,7 @@
 
 <div style="min-width: 50%; max-width:60%; position:relative; border-radius: 15px 15px 15px 15px; box-shadow: 1px 2px 2px 2px #939292; ">
         <form class="inputform" asp-action="exit" asp-controller="Chat">
-        <input type="hidden" name="Nickname" value=@User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault() />
+        <input type="hidden" name="userId" value=@User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault() />
         <input type="hidden" name="chatId" value="@Model.First().ChatId" />
         <input type="hidden" name="TimeOfPosting" />
         <p class="exit" style="width:10%">

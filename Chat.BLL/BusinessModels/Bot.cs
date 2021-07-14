@@ -8,6 +8,6 @@ namespace OneChat.BLL.BusinessModel
     {
         public abstract string Name { get; }
         public abstract Task<string> ExecuteAsync(string message);
-        public abstract Task CheckMessages(ChatMessageFIFO chatMessageFIFO);
+        public abstract Task<ChatMessageFIFO> CheckMessages(ChatMessageFIFO chatMessage);
     }
 }

@@ -62,15 +62,19 @@ namespace OneChat.BLL.Services
 
         public async Task DelMes(int chatId, int mesId)
         {
-            if (store.GetMessage(mesId).TimeOfPosting > DateTime.Now.AddDays(-1))
-                await store.RemoveMessage(mesId);
+            var message = store.GetMessage(mesId);
+            if((message!=null)&(message.TimeOfPosting > DateTime.Now.AddDays(-1)))
+                    await store.RemoveMessage(mesId);
         }
 
 
 
         public async Task Exit(int userId, int chatId)
         {
-            await store.DelUserFromChat(userId, chatId);
+            var user = store.GetUser(userId);
+            var chat = store.GetChat(chatId);
+            if(user!=null & chat!=null)
+                await store.DelUserFromChat(user, chat);
         }
 
 

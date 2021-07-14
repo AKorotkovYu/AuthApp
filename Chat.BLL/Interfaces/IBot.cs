@@ -7,6 +7,6 @@ namespace OneChat.BLL.Interfaces
     {
         public string Name { get; }
         public Task<string> ExecuteAsync(string message);
-        public Task CheckMessages(ChatMessageFIFO chatMessageFIFO);
+        public Task<ChatMessageFIFO> CheckMessages(ChatMessageFIFO chatMessage);
     }
 }

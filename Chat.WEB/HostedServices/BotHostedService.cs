@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using System.Linq;
 using OneChat.BLL.Services;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 
 namespace OneChat.WEB.HostedServices
 {
@@ -16,70 +17,91 @@ namespace OneChat.WEB.HostedServices
 
         private readonly IStore store;
         private readonly List<IBot> bots;
-        private readonly List<Task> tasks;
+        private readonly List<Task<ChatMessageFIFO>> tasks;
         private IConfiguration AppConfiguration { get; set; }
 
-        public BotHostedService(IStore store, IConfiguration configuration, IConfiguration conf)
-        {
-            tasks = new List<Task>();
-            AppConfiguration = conf;
 
+        static Mutex mutexObj = new Mutex();
+
+
+
+        public BotHostedService(IStore store, IConfiguration configuration)
+        {
+            tasks = new List<Task<ChatMessageFIFO>>();
 
             this.store = store ?? throw new ArgumentNullException(nameof(store));
+
+            //скидываем ботов
             MyServiceCollection sc = new(configuration);
             bots = sc.AddConfig().ToList();
+
+            AppConfiguration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
         }
 
 
 
         protected override Task ExecuteAsync(CancellationToken token)
         {
-            return Task.Run(async () =>
-            {
-                while (!token.IsCancellationRequested)
-                {
-                    await CheckFIFOAsync();
-                    await Task.Delay(1000, token);
-                }
-
-            }, token);
+            return Task.Run(async () => { await DistributeFIFOAsync(token); }, token);
         }
 
 
-        /// <summary>
-        /// Распределение многопоточной работы над сообщением в FIFO
-        /// </summary>
-        /// <returns></returns>
-        private async Task CheckFIFOAsync()
+
+        private async Task DistributeFIFOAsync(CancellationToken token)
         {
 
+
+            var allMessages = store.GetAllMessagesFIFO();
             var MaxThreads = Int32.Parse(AppConfiguration["BotsSettings:WorkerThread"]);
+            
 
-            List<ChatMessageFIFO> listFIFO = store.GetAllMessagesFIFO();
-
-            foreach (var chatMessageFIFO in listFIFO)
+            //циклим токеном
+            while (!token.IsCancellationRequested)
             {
-                foreach (var bot in bots)
+                if (allMessages.Count != 0)
                 {
-                    if (tasks.Count < MaxThreads)
+                    //скидываем всем ботам все сообщения
+                    foreach (var message in allMessages)
                     {
-                        tasks.Add(bot.CheckMessages(chatMessageFIFO));
+                        foreach (var bot in bots)
+                        {
+                            //если есть 4 потока, занятых прямо сейчас, то ждём хоть один
+                            while (tasks.Where(c => c.IsCompleted == false).Count() >= MaxThreads)
+                            {
+                                Task.WaitAny(tasks.ToArray(), token);
+
+                                //добавляем сообщению в флаг инфу о том, что оно обработано
+                                allMessages.Find(c => c.Id == tasks.Find(c => c.IsCompleted == true).Result.Id).InProcess++;
+                                tasks.Remove(tasks.Find(c => c.IsCompleted == true));
+                            }
+                            tasks.Add(bot.CheckMessages(message));
+                        }
                     }
-                    else
+
+
+
+                    //заканчиваем обработку этого пака сообщений(последние четыре таски этого пака сообщений. медленные боты или просто последнее)
+                    while (tasks.Where(c => c.IsCompleted == false).Any())
                     {
-                        Task.WaitAny(tasks.ToArray());
-                        tasks.Remove(tasks.First(c => c.IsCompleted == true));
-                        tasks.Add(bot.CheckMessages(chatMessageFIFO));
+                        Task.WaitAny(tasks.ToArray(), token);
+                        allMessages.Find(c => c.Id == tasks.Find(c => c.IsCompleted == true).Result.Id).InProcess++;
+                        tasks.Remove(tasks.Find(c => c.IsCompleted == true));
                     }
+
+
+
+                    //Просматриваем на прохождение обработки всех ботов для удаления
+                    foreach (var message in allMessages)
+                        if (message.InProcess >= bots.Count)
+                        {
+                            await store.RemoveMessageFIFO(message.Id);
+                        }
                 }
+
+                //циклим
+                allMessages = store.GetAllMessagesFIFO();
+                await Task.Delay(25000, token);
             }
-
-            //Дожидаемся всех чтобы перейти к следующему сообщению
-            Task.WaitAll(tasks.ToArray());
-            tasks.Clear();
-
-            foreach (var chatMessageFIFO in listFIFO)
-                await store.RemoveMessageFIFO();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace OneChat.BLL.Interfaces
 
         public Task<UserDTO> AddNewUser(UserDTO userDTO);
         public Task AddUserToChat(int userId, int chatId);
-        public Task DelUserFromChat(int userId, int chatId);
+        public Task DelUserFromChat(UserDTO userId, ChatDTO chatId);
         public UserDTO GetUser(string Email, string Password);
         public UserDTO GetUser(string nickname);
 
@@ -29,8 +29,8 @@ namespace OneChat.BLL.Interfaces
         public Task RemoveChat(int chatId);
         public Task RemoveMessage(int messageId);
         public Task RemoveMessageFIFO();
+        public Task RemoveMessageFIFO(int id);
         public ChatMessageFIFO GetMessageFIFO();
         public List<ChatMessageFIFO> GetAllMessagesFIFO();
-        public Task RemoveMessageFIFO(int messageId);
     }
 }

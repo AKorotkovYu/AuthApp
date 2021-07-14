@@ -15,7 +15,7 @@ namespace OneChat.BLL.BusinessModel
             this.serviceProvider = serviceProvider;
         }
 
-        public override async Task CheckMessages(ChatMessageFIFO chatMessage)
+        public override async Task<ChatMessageFIFO> CheckMessages(ChatMessageFIFO chatMessage)
         {
             await this.ExecuteAsync(chatMessage.Message).ContinueWith(async (task) =>
             {
@@ -30,6 +30,7 @@ namespace OneChat.BLL.BusinessModel
                         TimeOfPosting = System.DateTime.Now,
                     });
             });
+            return chatMessage;
         }
 
         public override string Name => "Downloader";

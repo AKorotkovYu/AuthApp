@@ -18,7 +18,9 @@ namespace AuthApp.Controllers
         [Authorize]
         public IActionResult Index(int chatId)
         {
+            if(chatId!=0)
             return View(store.AllAnotherUsers(chatId));
+            return RedirectToAction("Index", "Home");
         }
 
         [Authorize]

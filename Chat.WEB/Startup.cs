@@ -44,9 +44,7 @@ namespace OneChat.WEB
             services.AddTransient<IBotStore, BotStore>();
 
             services.AddHostedService<BotHostedService>();
-
         }
-
 
 
         public void Configure(IApplicationBuilder app)

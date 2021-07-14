@@ -40,7 +40,7 @@ namespace OneChat.BLL.BusinessModel
         public int BotID;
 
 
-        public override async Task CheckMessages(ChatMessageFIFO chatMessage)
+        public override async Task<ChatMessageFIFO> CheckMessages(ChatMessageFIFO chatMessage)
         {
             await this.ExecuteAsync(chatMessage.Message).ContinueWith(async (task) =>
             {
@@ -51,12 +51,14 @@ namespace OneChat.BLL.BusinessModel
                     {
                         ChatId = chatMessage.ChatId,
                         ChatName = chatMessage.ChatName,
-                        Message = task.Result,
+                        Message = $"{task.Result} {chatMessage.Nickname} {chatMessage.Id} | {chatMessage.Message}",
                         Nickname = $"{this.Name} {task.Id}",
                         TimeOfPosting = System.DateTime.Now,
                     });
                 }
             });
+
+            return chatMessage;
         }
 
 
@@ -67,9 +69,9 @@ namespace OneChat.BLL.BusinessModel
 
         public string Execute(string message)
         {
-            Thread.Sleep(15000);
             if (message != null)
             {
+                Thread.Sleep(25000);
                 var splittedMessage = message.Split();
                 foreach (var spltMsg in splittedMessage)
                     foreach (var phrase in phrases)

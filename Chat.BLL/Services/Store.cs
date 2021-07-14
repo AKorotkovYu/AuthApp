@@ -27,13 +27,14 @@ namespace OneChat.BLL.Services
             User user = Database.Users.GetAll().FirstOrDefault(u => u.Email == email && u.Password == password);
             if (user == null)
                 return null;
-            else 
-                return new UserDTO { 
-                    Chats = user.Chats, 
-                    DateOfRegistration = user.DateOfRegistration, 
-                    Email = user.Email, 
-                    Id = user.Id, 
-                    Nickname = user.Nickname 
+            else
+                return new UserDTO
+                {
+                    Chats = user.Chats,
+                    DateOfRegistration = user.DateOfRegistration,
+                    Email = user.Email,
+                    Id = user.Id,
+                    Nickname = user.Nickname
                 };
         }
 
@@ -45,12 +46,13 @@ namespace OneChat.BLL.Services
             if (user == null)
                 return null;
             else
-                return new UserDTO { 
-                    Chats = user.Chats, 
-                    DateOfRegistration = user.DateOfRegistration, 
-                    Email = user.Email, 
-                    Id = user.Id, 
-                    Nickname = user.Nickname 
+                return new UserDTO
+                {
+                    Chats = user.Chats,
+                    DateOfRegistration = user.DateOfRegistration,
+                    Email = user.Email,
+                    Id = user.Id,
+                    Nickname = user.Nickname
                 };
         }
 
@@ -58,25 +60,27 @@ namespace OneChat.BLL.Services
 
         public async Task<UserDTO> AddNewUser(UserDTO userDTO)
         {
-            User user = new() { 
-                Nickname = userDTO.Nickname, 
-                Chats = userDTO.Chats, 
-                DateOfRegistration = DateTime.Now, 
-                Email = userDTO.Email, 
-                Password = userDTO.Password 
+            User user = new()
+            {
+                Nickname = userDTO.Nickname,
+                Chats = userDTO.Chats,
+                DateOfRegistration = DateTime.Now,
+                Email = userDTO.Email,
+                Password = userDTO.Password
             };
-            
-            
+
+
             Database.Users.Create(user);
             await Database.Save();
 
 
-            return new UserDTO { 
-                Id = user.Id, 
-                Chats = user.Chats, 
-                DateOfRegistration = user.DateOfRegistration, 
-                Email = user.Email, 
-                Nickname = user.Nickname 
+            return new UserDTO
+            {
+                Id = user.Id,
+                Chats = user.Chats,
+                DateOfRegistration = user.DateOfRegistration,
+                Email = user.Email,
+                Nickname = user.Nickname
             };
         }
 
@@ -100,26 +104,19 @@ namespace OneChat.BLL.Services
 
 
 
-        public async Task DelUserFromChat(int userId, int chatId)
-        { 
-            User user = Database.Users
-                .GetAll()
-                .First(c => c.Id == userId);
+        public async Task DelUserFromChat(UserDTO userDTO, ChatDTO chatDTO)
+        {
+            User user = Database.Users.Get(userDTO.Id);
+            Chat chat = Database.Chats.Get(chatDTO.Id);
 
-
-            Chat chat = Database.Chats
-                .GetAll()
-                .First(c => c.Id == chatId);
-
-            if (chat != null | user != null)
+            if (chat.ChatUsers.Find(c => c.Id == user.Id) != null)
             {
                 chat.ChatUsers.Remove(user);
 
-                if (chat.AdminId == user.Id)
+                if (chat.AdminId == user.Id & chat.ChatUsers.FirstOrDefault() != null)
                 {
                     chat.AdminId = chat.ChatUsers.First().Id;
                 }
-
                 user.Chats.Remove(chat);
                 await Database.Save();
             }
@@ -368,16 +365,17 @@ namespace OneChat.BLL.Services
 
         public UserDTO GetUser(int userId)
         {
-            User user = Database.Users.Get(userId);
-            if (user == null)
-                return null;
-            return new UserDTO {
-                Id=user.Id,
-                Email=user.Email, 
-                Nickname=user.Nickname,
-                Password=user.Password,
-                DateOfRegistration=user.DateOfRegistration
-            };
+                User user = Database.Users.Get(userId);
+                if (user == null)
+                    return null;
+                return new UserDTO
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Nickname = user.Nickname,
+                    Password = user.Password,
+                    DateOfRegistration = user.DateOfRegistration
+                };
         }
 
 
