@@ -7,6 +7,7 @@ using System;
 using OneChat.BLL.DTO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using OneChat.WEB.Filters;
 
 namespace OneChat.WEB.Controllers
 {
@@ -34,6 +35,7 @@ namespace OneChat.WEB.Controllers
 
         [Authorize]
         [HttpPost]
+        [ServiceFilter(typeof(SendFilter))]
         public async Task<IActionResult> Send(ChatMessageModel model)
         {
             string nickname = User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault();

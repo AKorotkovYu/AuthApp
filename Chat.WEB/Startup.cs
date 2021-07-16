@@ -10,11 +10,14 @@ using OneChat.DAL.Repositories;
 using OneChat.BLL.Services;
 using OneChat.WEB.HostedServices;
 using OneChat.WEB.Middlewares;
+using OneChat.WEB.Filters;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace OneChat.WEB
 {
     public class Startup
     {
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -36,6 +39,11 @@ namespace OneChat.WEB
                 {
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 });
+            /*services.AddControllersWithViews(options=>
+            {
+                options.Filters.Add(typeof(SendFilter));
+            });*/
+            
             
             services.AddControllersWithViews();
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
@@ -45,6 +53,9 @@ namespace OneChat.WEB
             services.AddTransient<IBotStore, BotStore>();
 
             services.AddHostedService<BotHostedService>();
+            services.Configure<BotOptions>(Configuration.GetSection("BotsSettings"));
+            
+            
         }
 
 
@@ -55,6 +66,7 @@ namespace OneChat.WEB
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+
             app.UseMiddleware<UserStatsMiddleware>();
 
             app.UseEndpoints(endpoints =>

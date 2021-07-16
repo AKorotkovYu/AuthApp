@@ -20,15 +20,21 @@ namespace OneChat.WEB.Controllers
         }
 
         [Authorize]
-        public IActionResult Index()
+        public IActionResult Index(string error)
         {
-            return View();
+            return View(error);
         }
 
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateChat(ChatModel chatModel)
         {
+
+            if (string.IsNullOrEmpty(chatModel.ChatName))
+            {
+                ModelState.AddModelError("Name", "Некорректное название чата");
+            }
+
             if (ModelState.IsValid)
             {
                 await logic.CreateChatAsync(
@@ -38,8 +44,9 @@ namespace OneChat.WEB.Controllers
                         ChatName=chatModel.ChatName,
                         AdminId=chatModel.AdminId
                     });
+                return RedirectToAction("Index", "Home");
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "NewChat", ModelState.ValidationState.ToString());
         }
     }
 

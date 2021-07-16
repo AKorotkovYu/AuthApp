@@ -15,21 +15,21 @@ namespace OneChat.WEB.HostedServices
     public class BotHostedService : BackgroundService
     {
 
+        private readonly IOptionsMonitor<BotOptions> _optionsDelegate;
+
         private readonly IStore store;
         private readonly List<IBot> bots;
         private readonly List<Task<ChatMessageFIFO>> tasks;
         private IConfiguration AppConfiguration { get; set; }
 
 
-        static Mutex mutexObj = new Mutex();
 
-
-
-        public BotHostedService(IStore store, IConfiguration configuration)
+        public BotHostedService(IStore store, IConfiguration configuration, IOptionsMonitor<BotOptions> optionsDelegate)
         {
             tasks = new List<Task<ChatMessageFIFO>>();
 
             this.store = store ?? throw new ArgumentNullException(nameof(store));
+            _optionsDelegate = optionsDelegate;
 
             //скидываем ботов
             MyServiceCollection sc = new(configuration);
@@ -56,7 +56,8 @@ namespace OneChat.WEB.HostedServices
         private async Task DistributeFIFOAsync1(CancellationToken token)
         {
             var allMessagesInBase = await store.GetAllMessagesFIFOAsync();
-            var MaxThreads = Int32.Parse(AppConfiguration["BotsSettings:WorkerThread"]);
+            var MaxThreads = _optionsDelegate.CurrentValue.WorkerThread; 
+            //Int32.Parse(AppConfiguration["BotsSettings:WorkerThread"]);
 
 
             //циклим токеном
