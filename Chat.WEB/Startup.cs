@@ -39,10 +39,6 @@ namespace OneChat.WEB
                 {
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 });
-            /*services.AddControllersWithViews(options=>
-            {
-                options.Filters.Add(typeof(SendFilter));
-            });*/
 
             services.AddSingleton<SendFilter>();
             services.AddControllersWithViews();
@@ -67,7 +63,12 @@ namespace OneChat.WEB
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseMiddleware<UserStatsMiddleware>();
+
+            app.MapWhen(context =>
+            {
+                return context.Request.Path.Value.ToLower().Equals("/chat/send");
+            }, HandleQuery);
+
 
             app.UseEndpoints(endpoints =>
             {
@@ -75,6 +76,11 @@ namespace OneChat.WEB
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private static void HandleQuery(IApplicationBuilder app)
+        {
+            app.UseMiddleware<UserStatsMiddleware>();
         }
     }
 }

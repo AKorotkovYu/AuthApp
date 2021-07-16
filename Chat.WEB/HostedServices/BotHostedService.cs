@@ -20,7 +20,7 @@ namespace OneChat.WEB.HostedServices
         private readonly IStore store;
         private readonly List<IBot> bots;
         private readonly List<Task<ChatMessageFIFO>> tasks;
-        private IConfiguration AppConfiguration { get; set; }
+        //private IConfiguration AppConfiguration { get; set; }
 
 
 
@@ -35,7 +35,7 @@ namespace OneChat.WEB.HostedServices
             MyServiceCollection sc = new(configuration);
             bots = sc.AddConfig().ToList();
 
-            AppConfiguration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            //AppConfiguration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
         }
 
 

@@ -9,7 +9,7 @@ using OneChat.BLL.DTO;
 namespace OneChat.WEB.Middlewares
 {
 
-    public class UserStatsMiddleware
+    public class UserStatsMiddleware : Attribute
     {
         private readonly RequestDelegate _next;
 
@@ -20,7 +20,6 @@ namespace OneChat.WEB.Middlewares
 
         public async Task InvokeAsync(HttpContext context, IStore store, ILogic logic)
         {
-            if(context.Request.Path.Value=="/Chat/send" & context.Request.Method=="POST")
                 if (Int32.TryParse(context.User.Identity.Name, out int id))
                 {
                     var user = await store.GetUserAsync(id);
