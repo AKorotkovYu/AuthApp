@@ -31,7 +31,7 @@ namespace OneChat.WEB.Controllers
         {
             if (ModelState.IsValid)
             {
-                await logic.CreateChat(
+                await logic.CreateChatAsync(
                     Int32.Parse(User.Identity.Name),
                     new ChatDTO() { 
                         Id=chatModel.Id, 

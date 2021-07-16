@@ -13,73 +13,84 @@ namespace OneChat.BLL.Services
 {
     public class Logic: ILogic
     {
-
-
         private readonly IStore store;
-        private readonly List<IBot> bots;
-        private readonly List<Task> tasks;
         
-
-        public Logic(IStore store, IConfiguration configuration)
+        public Logic(IStore store)
         {
-            tasks = new List<Task>();
             this.store = store ?? throw new ArgumentNullException(nameof(store));
-            MyServiceCollection sc = new(configuration);
-            bots = sc.AddConfig().ToList();
         }
 
-
-
-        public async Task Send(ChatMessageDTO chatMessageDTO)
+        public async Task SendAsync(ChatMessageDTO chatMessageDTO)
         {
-            await store.SaveMessage(chatMessageDTO);
+            await store.SaveMessageAsync(chatMessageDTO);
+            await store.SaveMessageAsync(chatMessageDTO);
+            await store.SaveMessageAsync(chatMessageDTO);
+            await store.SaveMessageAsync(chatMessageDTO);
         }
 
-
-
-        public async Task CheckFIFOAsync()
+        public async Task DelMesAsync(int chatId, int mesId)
         {
-            ChatMessageFIFO chatMessageFIFO = store.GetMessageFIFO();
-            if(chatMessageFIFO!=null)
-                
-            do
-            {    
-                foreach (IBot bot in bots)
+            var message = await store.GetMessageAsync(mesId);
+            if((message!=null)&(message.TimeOfPosting > DateTime.Now.AddDays(-1)))
+                    await store.RemoveMessageAsync(mesId);
+        }
+
+        public async Task ExitAsync(int userId, int chatId)
+        {
+            var user = await store.GetUserAsync(userId);
+            var chat = await store.GetChatAsync(chatId);
+            if(user!=null & chat!=null)
+                await store.DelUserFromChatAsync(user, chat);
+        }
+
+        public async Task CreateChatAsync(int id, ChatDTO chatDTO)
+        {
+            UserDTO userDTO = await store.GetUserAsync(id);
+
+            if (userDTO != null)
+            {
+                ChatDTO newChat = new()
                 {
-                    tasks.Add(bot.CheckMessages(chatMessageFIFO));
-                }
+                    ChatName = chatDTO.ChatName,
+                    AdminId = userDTO.Id,
+                    ChatMessages = new()
+                };
 
-                Task.WaitAll(tasks.ToArray());
-                tasks.Clear();
+                newChat = await store.AddChatAsync(newChat);
 
-                await store.RemoveMessageFIFO();
-                chatMessageFIFO = store.GetMessageFIFO();
-            } 
-            while (chatMessageFIFO != null);
+                newChat.ChatMessages.Add(new()
+                {
+                    ChatId = newChat.Id,
+                    ChatName = newChat.ChatName,
+                    Message = "чат создан",
+                    Nickname = "system",
+                    TimeOfPosting = System.DateTime.Now
+                });
+                await store.AddUserToChatAsync(id, newChat.Id);
+            }
         }
 
+        public void Send(ChatMessageDTO chatMessageDTO)
+        {
+             store.SaveMessage(chatMessageDTO);
+        }
 
-
-        public async Task DelMes(int chatId, int mesId)
+        public void DelMes(int chatId, int mesId)
         {
             var message = store.GetMessage(mesId);
-            if((message!=null)&(message.TimeOfPosting > DateTime.Now.AddDays(-1)))
-                    await store.RemoveMessage(mesId);
+            if ((message != null) & (message.TimeOfPosting > DateTime.Now.AddDays(-1)))
+                 store.RemoveMessage(mesId);
         }
 
-
-
-        public async Task Exit(int userId, int chatId)
+        public void Exit(int userId, int chatId)
         {
             var user = store.GetUser(userId);
             var chat = store.GetChat(chatId);
-            if(user!=null & chat!=null)
-                await store.DelUserFromChat(user, chat);
+            if (user != null & chat != null)
+                store.DelUserFromChat(user, chat);
         }
 
-
-
-        public async Task CreateChat(int id, ChatDTO chatDTO)
+        public void CreateChat(int id, ChatDTO chatDTO)
         {
             UserDTO userDTO = store.GetUser(id);
 
@@ -92,7 +103,7 @@ namespace OneChat.BLL.Services
                     ChatMessages = new()
                 };
 
-                newChat = await store.AddChat(newChat);
+                newChat = store.AddChat(newChat);
 
                 newChat.ChatMessages.Add(new()
                 {
@@ -102,8 +113,13 @@ namespace OneChat.BLL.Services
                     Nickname = "system",
                     TimeOfPosting = System.DateTime.Now
                 });
-                await store.AddUserToChat(id, newChat.Id);
+                store.AddUserToChat(id, newChat.Id);
             }
+        }
+
+        public void UpdateUser(UserDTO user)
+        {
+            store.UpdateUser(user);
         }
     }
 }

@@ -5,6 +5,8 @@ using OneChat.DAL.Entities;
 using OneChat.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using OneChat.DAL.EF;
+using System.Threading.Tasks;
+
 
 namespace OneChat.DAL.Repositories
 {
@@ -17,18 +19,28 @@ namespace OneChat.DAL.Repositories
             this.db = context;
         }
 
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await db.Users
+                .Include(c=>c.Chats).ToListAsync();
+        }
+
+        public async Task<User> GetAsync(int id)
+        {
+            var users = db.Users.Include(c => c.Chats).Where(c => c.Id == id);
+             return await users.FirstAsync();
+        }
+
         public IEnumerable<User> GetAll()
         {
             return db.Users
-                .Include(c=>c.Chats);
+                .Include(c => c.Chats).ToList();
         }
 
         public User Get(int id)
         {
-            return db.Users
-                .Include(c=>c.Chats)
-                .Where(c=>c.Id==id)
-                .First();
+            var users = db.Users.Include(c => c.Chats).Where(c => c.Id == id);
+            return users.First();
         }
 
         public void Create(User user)

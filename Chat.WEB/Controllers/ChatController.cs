@@ -27,7 +27,7 @@ namespace OneChat.WEB.Controllers
             if (chatId != 0)
             {
                 this.chatId = chatId;
-                return View(await store.GetMessages(chatId));
+                return View(await store.GetMessagesAsync(chatId));
             }
             return RedirectToAction("Index", "Home");
         }
@@ -39,7 +39,7 @@ namespace OneChat.WEB.Controllers
             string nickname = User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault();
             if (model != null)
             {
-                await logic.Send(
+                await logic.SendAsync(
                 new ChatMessageDTO
                 {
                     Id = model.Id,
@@ -48,6 +48,7 @@ namespace OneChat.WEB.Controllers
                     ChatId = model.ChatId,
                     ChatName = model.ChatName,
                     Message = model.Message,
+                    SenderId=Int32.Parse(User.Identity.Name),
                     TimeOfPosting = DateTime.Now
                 });
 
@@ -61,7 +62,7 @@ namespace OneChat.WEB.Controllers
         public async Task<IActionResult> DelMes(int chatId, int mesId)
         {
             if(mesId!=0)
-                await logic.DelMes(chatId, mesId);
+                await logic.DelMesAsync(chatId, mesId);
             return RedirectToAction("Index", "Chat", new { chatId });
         }
 
@@ -70,7 +71,7 @@ namespace OneChat.WEB.Controllers
         public async Task<IActionResult> Exit(int userId, int chatId)
         {
             if(userId!=0)
-                await logic.Exit(userId, chatId);
+                await logic.ExitAsync(userId, chatId);
             return RedirectToAction("Index", "Home");
         }
     }

@@ -16,17 +16,20 @@ namespace AuthApp.Controllers
         }
 
         [Authorize]
-        public IActionResult Index(int chatId)
+        public async Task<IActionResult> Index(int chatId)
         {
-            if(chatId!=0)
-            return View(store.AllAnotherUsers(chatId));
+            if (chatId != 0)
+            {
+                var allAnotherUsers = await store.AllAnotherUsersAsync(chatId);
+                return View(allAnotherUsers);
+            }
             return RedirectToAction("Index", "Home");
         }
 
         [Authorize]
         public async Task<IActionResult> AddUser(int userId, int chatId)
         {
-            await store.AddUserToChat(userId, chatId);
+            await store.AddUserToChatAsync(userId, chatId);
 
             return RedirectToAction("Index", "AddUserToChat", new { chatId });
         }

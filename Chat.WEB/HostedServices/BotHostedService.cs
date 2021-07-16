@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace OneChat.WEB.HostedServices
 {
-    public class BotHostedService: BackgroundService
+    public class BotHostedService : BackgroundService
     {
 
         private readonly IStore store;
@@ -42,65 +42,81 @@ namespace OneChat.WEB.HostedServices
 
         protected override Task ExecuteAsync(CancellationToken token)
         {
-            return Task.Run(async () => { await DistributeFIFOAsync(token); }, token);
+            return Task.Run(async () => {
+                while (!token.IsCancellationRequested)
+                {
+                    await Task.Delay(2500);
+                    await DistributeFIFOAsync1(token);
+                }
+            }, token);
         }
 
 
 
-        private async Task DistributeFIFOAsync(CancellationToken token)
+        private async Task DistributeFIFOAsync1(CancellationToken token)
         {
-
-
-            var allMessages = store.GetAllMessagesFIFO();
+            var allMessagesInBase = await store.GetAllMessagesFIFOAsync();
             var MaxThreads = Int32.Parse(AppConfiguration["BotsSettings:WorkerThread"]);
-            
+
 
             //циклим токеном
             while (!token.IsCancellationRequested)
             {
-                if (allMessages.Count != 0)
+                if (allMessagesInBase.Count != 0)
                 {
+                    //тк важно чтобы он не прерывался
                     //скидываем всем ботам все сообщения
-                    foreach (var message in allMessages)
+
+                    //чтобы мочь добавлять и изменять массив над которым работаем. Иначе выпадем в foreach
+                    List<ChatMessageFIFO> allMessagesBuffer = new();
+                    
+                    foreach(var message in allMessagesInBase)
+                        allMessagesBuffer.Add(message);
+
+
+
+                    foreach (var message in allMessagesBuffer)
                     {
-                        foreach (var bot in bots)
-                        {
-                            //если есть 4 потока, занятых прямо сейчас, то ждём хоть один
-                            while (tasks.Where(c => c.IsCompleted == false).Count() >= MaxThreads)
+                       
+                        //если мы их ещё не кидали на обработку в прошлом подходе. обычно это поледнее сообщение
+                        if(message.InProcess==0)
+                            foreach (var bot in bots)
                             {
-                                Task.WaitAny(tasks.ToArray(), token);
+                                //если есть 4 потока, занятых прямо сейчас, то ждём хоть один
+                                while (tasks.Where(c => c.IsCompleted == false).Count() >= MaxThreads)
+                                {
+                                    Task.WaitAny(tasks.ToArray(), token);
 
-                                //добавляем сообщению в флаг инфу о том, что оно обработано
-                                allMessages.Find(c => c.Id == tasks.Find(c => c.IsCompleted == true).Result.Id).InProcess++;
-                                tasks.Remove(tasks.Find(c => c.IsCompleted == true));
+                                    // проверяем и удаляем отработанные сообщения
+                                    // каждый раз как добавляем таску
+                                    foreach (var oneMessage in allMessagesBuffer)
+                                    {
+                                        if (oneMessage.InProcess >= bots.Count)
+                                        {
+                                            await store.RemoveMessageFIFOAsync(oneMessage.Id);
+                                            allMessagesInBase.Remove(oneMessage);
+                                        }
+                                    }
+
+
+
+                                    //перекидываем из буфера отработанное в данной законченной таске сообщение
+                                    var processedMessage=allMessagesBuffer?.Find(c => c.Id == tasks.Find(c => c.IsCompleted == true).Result.Id);
+                                    if (processedMessage != null)
+                                    {
+                                        var processedMessageInBase = allMessagesInBase?.Find(c => c.Id == processedMessage.Id);
+                                        if (processedMessageInBase != null)
+                                            processedMessageInBase.InProcess++;
+                                    }
+                                    tasks.Remove(tasks.Find(c => c.IsCompleted == true));
+                                }
+
+                                //кидаем в обработку
+                                tasks.Add(bot.CheckMessages(message));     
                             }
-                            tasks.Add(bot.CheckMessages(message));
-                        }
                     }
-
-
-
-                    //заканчиваем обработку этого пака сообщений(последние четыре таски этого пака сообщений. медленные боты или просто последнее)
-                    while (tasks.Where(c => c.IsCompleted == false).Any())
-                    {
-                        Task.WaitAny(tasks.ToArray(), token);
-                        allMessages.Find(c => c.Id == tasks.Find(c => c.IsCompleted == true).Result.Id).InProcess++;
-                        tasks.Remove(tasks.Find(c => c.IsCompleted == true));
-                    }
-
-
-
-                    //Просматриваем на прохождение обработки всех ботов для удаления
-                    foreach (var message in allMessages)
-                        if (message.InProcess >= bots.Count)
-                        {
-                            await store.RemoveMessageFIFO(message.Id);
-                        }
                 }
-
-                //циклим
-                allMessages = store.GetAllMessagesFIFO();
-                await Task.Delay(25000, token);
+                allMessagesInBase = await store.GetAllMessagesFIFOAsync();
             }
         }
     }

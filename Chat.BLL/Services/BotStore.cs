@@ -20,11 +20,12 @@ namespace OneChat.BLL.Services
         {
             ChatMessage message = new()
             {
-                Id = messageDTO.Id,
+                Id = messageDTO.SenderId,
                 IsOld = messageDTO.isOld,
                 ChatId = messageDTO.ChatId,
                 Message = messageDTO.Message,
                 Nickname = messageDTO.Nickname,
+                SenderId = messageDTO.SenderId,
                 ChatName = messageDTO.ChatName,
                 TimeOfPosting = messageDTO.TimeOfPosting
             };

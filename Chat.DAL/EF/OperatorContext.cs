@@ -13,7 +13,7 @@ namespace OneChat.DAL.EF
         public OperatorContext(DbContextOptions<OperatorContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
+            Database.EnsureCreated();   // создаем бд с новой схемой
         }
     }
 }

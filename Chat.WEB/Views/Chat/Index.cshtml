@@ -7,44 +7,45 @@
 @{
 }
 
-<div style="min-width: 50%; max-width:60%; position:relative; border-radius: 15px 15px 15px 15px; box-shadow: 1px 2px 2px 2px #939292; ">
-        <form class="inputform" asp-action="exit" asp-controller="Chat">
+<div style="min-width: 50%; max-width:100%; position:relative; border-radius: 15px 15px 15px 15px; box-shadow: 1px 2px 2px 2px #939292; min-width:20em ">
+    <form class="inputform" asp-action="exit" asp-controller="Chat">
         <input type="hidden" name="userId" value=@User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault() />
         <input type="hidden" name="chatId" value="@Model.First().ChatId" />
         <input type="hidden" name="TimeOfPosting" />
         <p class="exit" style="width:10%">
-            <input type="submit" value="Выйти из чата" class="btn btn-danger btn-lg btn-block" style="position:absolute; right:0px; border-radius: 0px 15px 0px 0px" />
+            <input type="submit" value="Выйти из чата" style="position:absolute; right:0px; border-radius: 0px 15px 0px 0px; max-width:45%; background-color:#f54245; color:white; border:none; height: 2.5em" />
         </p>
-        </form>
-    <h1 style="margin:20px 10px 10px 10px">@Model.First().ChatName</h1>
+    </form>
+    <h1 style="margin: 10px 10px 20px 20px; min-width: 15em ">@Model.First().ChatName</h1>
     <div style="position: center; border-radius: 15px 15px 15px 15px; margin:10px">
 
         @foreach (var message in Model)
         {
-        <form asp-action="DelMes" asp-controller="Chat" style="margin: 10px 10px 10px 10px; background-color: #1111; border-radius: 10px 10px 10px 10px">
+            <form asp-action="DelMes" asp-controller="Chat" style="margin: 30px 10px 10px 10px; background-color: #1111; border-radius: 10px 10px 10px 10px">
 
-            <div class="send" style="margin: 10px">
-                <p style="margin: 0px; background-color: #2222; text-align:center">
-                    @message.Nickname
-                    @message.TimeOfPosting
-                </p>
-                <p style="margin: 10px">
-                    @message.Message
-                </p>
-                <input type="hidden" value="@message.ChatId" name="chatId">
-                <input type="hidden" value="@message.Id" name="mesId">
+                <div class="send" style="margin: 10px">
+                    <p style="margin: 0px; background-color: #2222; text-align:center">
+                        @message.Nickname
+                        @message.TimeOfPosting
+                        @message.Id
+                    </p>
+                    <p style="margin: 10px">
+                        @message.Message
+                    </p>
+                    <input type="hidden" value="@message.ChatId" name="chatId">
+                    <input type="hidden" value="@message.Id" name="mesId">
 
-            </div>
+                </div>
 
-            @if (message.Nickname == User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault())
-            {
-                @if (message.isOld == false)
+                @if (message.Nickname == User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault())
                 {
-                    <input type="submit" value="x" class="bg-transparent border-0" />
+                    @if (message.isOld == false)
+                    {
+                        <input type="submit" value="x" class="bg-transparent border-0" />
+                    }
                 }
-            }
             </form>
-        } 
+        }
         <div style="border-radius: 0px 0px 15px 15px;">
             <form asp-action="send" asp-controller="Chat">
                 <input type="hidden" name="Nickname" value=@User.Identity.Name />

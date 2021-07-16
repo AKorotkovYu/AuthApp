@@ -11,6 +11,7 @@ namespace OneChat.DAL.Entities
         public int Id { get; set; }
         public int ChatId { get; set; }
         public string ChatName { get; set; }
+        public int SenderId { get; set; }
         public string Nickname { get; set; }
         public bool IsOld { get; set; }
         public DateTime TimeOfPosting { get; set; }

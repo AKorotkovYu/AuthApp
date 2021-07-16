@@ -34,7 +34,7 @@ namespace OneChat.WEB.Controllers
         {
             if (ModelState.IsValid)
             {
-                userObject = store.GetUser(model.Email, model.Password);
+                userObject = await store.GetUserAsync(model.Email, model.Password);
                 if (userObject != null)
                 {
                     await Authenticate(userObject.Id); // аутентификация
@@ -56,12 +56,12 @@ namespace OneChat.WEB.Controllers
         {
             if (ModelState.IsValid)
             {
-                userObject = store.GetUser(model.Email, model.Password);
+                userObject = await store.GetUserAsync(model.Email, model.Password);
                 if (userObject == null)
                 {
-                    await store.AddNewUser(new UserDTO { Email = model.Email, Nickname = model.Nickname, Password = model.Password });
+                    await store.AddNewUserAsync(new UserDTO { Email = model.Email, Nickname = model.Nickname, Password = model.Password });
                     
-                    userObject = store.GetUser(model.Email);
+                    userObject = await store.GetUserAsync(model.Email);
                     await Authenticate(userObject.Id); // аутентификация
                     return RedirectToAction("Index", "Home");
                 }
@@ -74,10 +74,12 @@ namespace OneChat.WEB.Controllers
 
         private async Task Authenticate(int userName)
         {
+            var user = await store.GetUserAsync(userName);
             var claims = new List<Claim>
             {
+                
                 new Claim(ClaimsIdentity.DefaultNameClaimType, userName.ToString()),
-                new Claim("Nickname", store.GetUser(userName).Nickname)
+                new Claim("Nickname", user.Nickname)
             };
             ClaimsIdentity id = new(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
 
@@ -92,9 +94,9 @@ namespace OneChat.WEB.Controllers
         }
 
         [Authorize]
-        public IActionResult UserPage()
+        public async Task<IActionResult> UserPage()
         {
-            userObject = store.GetUser(HttpContext.User.Identity.Name);
+            userObject = await store.GetUserAsync(HttpContext.User.Identity.Name);
             return View(userObject);
         }
     }

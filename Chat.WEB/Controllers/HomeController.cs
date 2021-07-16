@@ -16,9 +16,10 @@ namespace AuthApp.Controllers
         }
 
         [Authorize]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(store.GetAllUserChats(Int32.Parse(User.Identity.Name)));
+            var allChats = await store.GetAllUserChatsAsync(Int32.Parse(User.Identity.Name));
+            return View(allChats);
         }
 
         [Authorize]
@@ -31,7 +32,7 @@ namespace AuthApp.Controllers
         [HttpPost]
         public async Task<IActionResult> DelChat(int chatId)
         {
-            await store.RemoveChat(chatId);
+            await store.RemoveChatAsync(chatId);
             return RedirectToAction("Index", "Home");
         }
     }

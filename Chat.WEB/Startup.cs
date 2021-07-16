@@ -9,6 +9,7 @@ using OneChat.DAL.Interfaces;
 using OneChat.DAL.Repositories;
 using OneChat.BLL.Services;
 using OneChat.WEB.HostedServices;
+using OneChat.WEB.Middlewares;
 
 namespace OneChat.WEB
 {
@@ -54,6 +55,7 @@ namespace OneChat.WEB
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<UserStatsMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {

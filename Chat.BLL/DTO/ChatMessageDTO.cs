@@ -10,6 +10,7 @@ namespace OneChat.BLL.DTO
         public int Id { get; set; }
         public int ChatId { get; set; }
         public string ChatName { get; set; }
+        public int SenderId { get; set; }
         public string Nickname { get; set; }
         public bool isOld { get; set; }
         public DateTime TimeOfPosting { get; set; }

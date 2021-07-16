@@ -5,6 +5,7 @@ using OneChat.DAL.Entities;
 using OneChat.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using OneChat.DAL.EF;
+using System.Threading.Tasks;
 
 namespace OneChat.DAL.Repositories
 {
@@ -17,9 +18,19 @@ namespace OneChat.DAL.Repositories
             this.db = context;
         }
 
+        public async Task<IEnumerable<ChatMessage>> GetAllAsync()
+        {
+            return await db.ChatMessages.ToListAsync();
+        }
+
+        public async Task<ChatMessage> GetAsync(int id)
+        {
+            return await db.ChatMessages.FindAsync(id);
+        }
+
         public IEnumerable<ChatMessage> GetAll()
         {
-            return db.ChatMessages;
+            return db.ChatMessages.ToList();
         }
 
         public ChatMessage Get(int id)

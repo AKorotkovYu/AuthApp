@@ -5,33 +5,43 @@
 @model List<ChatDTO>
 
 <div class="text-center" >
-    <h2 class="display-3 text-info">Добро пожаловать, @User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault()</h2>
+    <h2 class="display-3 text-info" style="min-width:15em">Добро пожаловать, @User.Claims.Where(c => c.Type == "Nickname").Select(c => c.Value).SingleOrDefault()</h2>
 </div>
 <br>
 
 
-<div style="width: 100%; border-radius: 15px; box-shadow: 2px 4px 4px 4px #939292; position:center; margin:10px">
+<div style="width: 100%; border-radius: 15px; box-shadow: 2px 4px 4px 4px #939292; position: center; min-width: 15em">
     <h4 class="display-4 text-center">Список Чатов</h4>
-    @foreach (var chat in Model)
+    @if (Model.Count != 0)
     {
-    <div style="margin: 10px 10px 10px 10px; background-color: #1111; border-radius: 10px 10px 10px 10px ">
-        <form method="post" asp-controller="Chat">
-            <input type="hidden" value="@chat.Id" name="chatId">
-            <input type="submit" value="Войти в @chat.ChatName" class="bg-transparent border-0" />
-        </form>
-        @if (chat.AdminId.ToString() == User.Identity.Name)
+        @foreach (var chat in Model)
         {
-            <form method="post" asp-action="DelChat" asp-controller="Home">
+<div style="margin: 10px 10px 10px 10px; background-color: #1111; border-radius: 10px 10px 10px 10px; position:relative">
+            @if (chat.AdminId.ToString() == User.Identity.Name)
+            {
+                <form method="post" asp-action="DelChat" asp-controller="Home">
+                    <input type="hidden" value="@chat.Id" name="chatId">
+                    <input type="submit" value="x" class="bg-transparent border-0" style="position:absolute; left: 97%; transform: translate(-50%, 0)" />
+                </form>
+            }
+            <form method="post" asp-controller="Chat">
                 <input type="hidden" value="@chat.Id" name="chatId">
-                <input type="submit" value="x" class="bg-transparent border-0" />
+                <input type="submit" style="position:relative; left: 50%; transform: translate(-50%, 0)" value="Войти в @chat.ChatName" class="bg-transparent border-0" />
             </form>
+
+            <form method="post" asp-controller="AddUserToChat">
+                <input type="hidden" value="@chat.Id" name="chatId">
+                <input type="submit" value="Добавить в чат" class="bg-transparent border-0" style="position:relative; left: 50%; transform: translate(-50%, 0)" />
+            </form>
+        </div>
         }
-        <form method="post" asp-controller="AddUserToChat">
-            <input type="hidden" value="@chat.Id" name="chatId">
-            <input type="submit" value="Добавить в чат" class="bg-transparent border-0" />
-        </form>
-    </div>
     }
+    else
+    {
+        <div class="text-center" style="margin: 10px 10px 10px 10px; background-color: #1111; border-radius: 10px 10px 10px 10px ">
+            <h7>У вас пока нет доступных чатов. Создайте новый и начните общение:)</h7>
+        </div>
+        }
     <br>
     <form asp-area="" asp-controller="NewChat" asp-action="Index" width:100%">
         <input type="submit" value="Новый чат" class="btn btn-primary btn-lg btn-block;" style="border-radius: 0px 0px 0px 15px" />

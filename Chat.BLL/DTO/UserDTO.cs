@@ -14,6 +14,9 @@ namespace OneChat.BLL.DTO
         public string Email { get; set; }
         public string Password { get; set; }
         public DateTime DateOfRegistration { get; set; }
+        public int MessageActivity { get; set; }
+        public DateTime LastMessageTime { get; set; }
+        public float AverageMessageCountInDay { get; set; }
         public List<Chat> Chats { get; set; } = new List<Chat>();
     }
 }

@@ -71,7 +71,6 @@ namespace OneChat.BLL.BusinessModel
         {
             if (message != null)
             {
-                Thread.Sleep(25000);
                 var splittedMessage = message.Split();
                 foreach (var spltMsg in splittedMessage)
                     foreach (var phrase in phrases)
