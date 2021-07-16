@@ -43,8 +43,8 @@ namespace OneChat.WEB
             {
                 options.Filters.Add(typeof(SendFilter));
             });*/
-            
-            
+
+            services.AddSingleton<SendFilter>();
             services.AddControllersWithViews();
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
             services.AddTransient<IBotUnitOfWork, BotEFUnitOfWork>();
