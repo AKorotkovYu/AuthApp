@@ -80,7 +80,7 @@ namespace OneChat.WEB.HostedServices
                     {
                        
                         //если мы их ещё не кидали на обработку в прошлом подходе. обычно это поледнее сообщение
-                        if(message.InProcess==0)
+                        
                             foreach (var bot in bots)
                             {
                                 //если есть 4 потока, занятых прямо сейчас, то ждём хоть один
@@ -101,22 +101,24 @@ namespace OneChat.WEB.HostedServices
 
 
 
-                                    //перекидываем из буфера отработанное в данной законченной таске сообщение
-                                    var processedMessage=allMessagesBuffer?.Find(c => c.Id == tasks.Find(c => c.IsCompleted == true).Result.Id);
-                                    if (processedMessage != null)
-                                    {
-                                        var processedMessageInBase = allMessagesInBase?.Find(c => c.Id == processedMessage.Id);
-                                        if (processedMessageInBase != null)
-                                            processedMessageInBase.InProcess++;
-                                    }
-                                    tasks.Remove(tasks.Find(c => c.IsCompleted == true));
+                                    
                                 }
 
                                 //кидаем в обработку
                                 tasks.Add(bot.CheckMessages(message));     
                             }
                     }
+                    //перекидываем из буфера отработанное в данной законченной таске сообщение
+                    var processedMessage=allMessagesBuffer?.Find(c => c.Id == tasks.Find(c => c.IsCompleted == true).Result.Id);
+                    if (processedMessage != null)
+                    {
+                        var processedMessageInBase = allMessagesInBase?.Find(c => c.Id == processedMessage.Id);
+                        if (processedMessageInBase != null)
+                            processedMessageInBase.InProcess++;
+                    }
+                    tasks.Remove(tasks.Find(c => c.IsCompleted == true));
                 }
+                
                 allMessagesInBase = await store.GetAllMessagesFIFOAsync();
             }
         }

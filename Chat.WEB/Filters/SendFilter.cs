@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Http;
 using OneChat.BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc.Filters;
 
+
 namespace OneChat.WEB.Filters
 {
-    public class SendFilter : Attribute, IActionFilter
+    public class SendFilter : IActionFilter
     {
         private readonly IStore store;
         private readonly ILogic logic;

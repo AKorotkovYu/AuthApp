@@ -69,3 +69,38 @@ body {
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
 }
+
+
+.chatName {
+    margin: 10px 10px 20px 20px; 
+    min-width: 15em;
+}
+
+.messagesBox {
+    position: center; 
+    border-radius: 15px 15px 15px 15px; 
+    margin:10px;
+}
+
+.delMessButton {
+    margin: 30px 10px 10px 10px; 
+    background-color: #1111; 
+    border-radius: 0px 10px 10px 10px;
+}
+
+.pSend {
+    background-color: #1111;
+    text-align: center;
+    border-radius: 0px 0px 10px 10px;
+}
+
+.exit {
+    position:absolute;
+    right:0px;
+    border-radius: 0px 15px 0px 0px;
+    max-width:45%;
+    background-color:#f54245;
+    color:white;
+    border:none;
+    height: 2.5em;
+}

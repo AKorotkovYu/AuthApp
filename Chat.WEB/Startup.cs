@@ -11,7 +11,7 @@ using OneChat.BLL.Services;
 using OneChat.WEB.HostedServices;
 using OneChat.WEB.Middlewares;
 using OneChat.WEB.Filters;
-using Microsoft.AspNetCore.Mvc.Filters;
+using AutoMapper;
 
 namespace OneChat.WEB
 {
@@ -40,13 +40,21 @@ namespace OneChat.WEB
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 });
 
-            services.AddSingleton<SendFilter>();
+            services.AddTransient<SendFilter>();
             services.AddControllersWithViews();
             services.AddTransient<IUnitOfWork, EFUnitOfWork>();
             services.AddTransient<IBotUnitOfWork, BotEFUnitOfWork>();
             services.AddTransient<ILogic, Logic>();
             services.AddTransient<IStore, Store>();
             services.AddTransient<IBotStore, BotStore>();
+
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
 
             services.AddHostedService<BotHostedService>();
             services.Configure<BotOptions>(Configuration.GetSection("BotsSettings"));
@@ -63,11 +71,7 @@ namespace OneChat.WEB
             app.UseAuthentication();
             app.UseAuthorization();
 
-
-            app.MapWhen(context =>
-            {
-                return context.Request.Path.Value.ToLower().Equals("/chat/send");
-            }, HandleQuery);
+            HandleQuery(app);
 
 
             app.UseEndpoints(endpoints =>

@@ -33,6 +33,7 @@ namespace OneChat.WEB.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+
         [Authorize]
         [HttpPost]
         [ServiceFilter(typeof(SendFilter))]
@@ -59,6 +60,7 @@ namespace OneChat.WEB.Controllers
             }
             return RedirectToAction("Index", "Chat", new { chatId });
         }
+
 
         [Authorize]
         [HttpPost]

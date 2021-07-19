@@ -7,17 +7,30 @@ using OneChat.DAL.Interfaces;
 using AutoMapper;
 using System;
 using System.Threading.Tasks;
-using System.Threading;
 
+
+public class MappingProfile : Profile
+{
+    public MappingProfile()
+    {
+        // Add as many of these lines as you need to map your objects
+        CreateMap<User, UserDTO>();
+        CreateMap<UserDTO, User>();
+    }
+}
 
 namespace OneChat.BLL.Services
 {
     public class Store : IStore
     {
         IUnitOfWork Database { get; set; }
+        IMapper mapper;
 
-        public Store(IUnitOfWork uow)
+
+
+        public Store(IUnitOfWork uow, IMapper mapper)
         {
+            this.mapper = mapper;
             Database = uow;
         }
 
@@ -65,17 +78,7 @@ namespace OneChat.BLL.Services
         //
         public async Task<UserDTO> AddNewUserAsync(UserDTO userDTO)
         {
-            User user = new()
-            {
-                Nickname = userDTO.Nickname,
-                Chats = userDTO.Chats,
-                DateOfRegistration = DateTime.Now,
-                Email = userDTO.Email,
-                Password = userDTO.Password,
-                MessageActivity = userDTO.MessageActivity,
-                AverageMessageCountInDay = userDTO.AverageMessageCountInDay,
-            };
-
+            User user = mapper.Map<User>(userDTO);
             Database.Users.Create(user);
             await Database.Save();
 
@@ -131,7 +134,6 @@ namespace OneChat.BLL.Services
         //TODO: MAPPER
         public async Task<Dictionary<UserDTO, int>> AllAnotherUsersAsync(int chatId)
         {
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<User, UserDTO>()).CreateMapper();
             Dictionary<User, int> users = new();
 
             var chats = await Database.Chats.GetAllAsync();
@@ -303,17 +305,7 @@ namespace OneChat.BLL.Services
             var chatMessage = chatMessages.FirstOrDefault(x => x.Id == mesId);
             if (chatMessage == null)
                 return null;
-            return new()
-            {
-                Id = chatMessage.Id,
-                isOld = chatMessage.IsOld,
-                ChatId = chatMessage.ChatId,
-                Message = chatMessage.Message,
-                ChatName = chatMessage.ChatName,
-                Nickname = chatMessage.Nickname,
-                SenderId = chatMessage.SenderId,
-                TimeOfPosting = chatMessage.TimeOfPosting
-            };
+            return mapper.Map<ChatMessageDTO>(chatMessage);
         }
 
         private async Task<List<ChatMessage>> GetMessagesCheckOldAsync(int chatId)
@@ -341,17 +333,7 @@ namespace OneChat.BLL.Services
 
             foreach (ChatMessage chatMessage in chatMessages)
             {
-                chatMessageDTOs.Add(new ChatMessageDTO
-                {
-                    ChatId = chatMessage.ChatId,
-                    ChatName = chatMessage.ChatName,
-                    Id = chatMessage.Id,
-                    Message = chatMessage.Message,
-                    isOld = chatMessage.IsOld,
-                    SenderId = chatMessage.SenderId,
-                    Nickname = chatMessage.Nickname,
-                    TimeOfPosting = chatMessage.TimeOfPosting
-                });
+                chatMessageDTOs.Add(mapper.Map<ChatMessageDTO>(chatMessage));
             }
 
             return chatMessageDTOs;
@@ -362,18 +344,7 @@ namespace OneChat.BLL.Services
             User user = await Database.Users.GetAsync(userId);
             if (user == null)
                 return null;
-            return new UserDTO
-            {
-                Id = user.Id,
-                Chats = user.Chats,
-                Email = user.Email,
-                Nickname = user.Nickname,
-                Password = user.Password,
-                LastMessageTime=user.LastMessageTime,
-                MessageActivity = user.MessageActivity,
-                AverageMessageCountInDay = user.AverageMessageCountInDay,
-                DateOfRegistration = user.DateOfRegistration
-            };
+            return mapper.Map<UserDTO>(user);
         }
 
         public async Task<ChatDTO> GetChatAsync(int chatId)
@@ -381,7 +352,7 @@ namespace OneChat.BLL.Services
             Chat chat = await Database.Chats.GetAsync(chatId);
             if (chat == null)
                 return null;
-            return new ChatDTO { AdminId = chat.AdminId, ChatName = chat.ChatName, Id = chat.Id };
+            return mapper.Map<ChatDTO>(chat);
         }
 
 
@@ -395,17 +366,7 @@ namespace OneChat.BLL.Services
             if (user == null)
                 return null;
             else
-                return new UserDTO
-                {
-                    Chats = user.Chats,
-                    DateOfRegistration = user.DateOfRegistration,
-                    Email = user.Email,
-                    Id = user.Id,
-                    MessageActivity = user.MessageActivity,
-                    Nickname = user.Nickname,
-                    AverageMessageCountInDay = user.AverageMessageCountInDay,
-                    LastMessageTime= user.LastMessageTime
-                };
+                return mapper.Map<UserDTO>(user);
         }
 
         public UserDTO GetUser(string nickname)
@@ -416,17 +377,7 @@ namespace OneChat.BLL.Services
             if (user == null)
                 return null;
             else
-                return new UserDTO
-                {
-                    Chats = user.Chats,
-                    DateOfRegistration = user.DateOfRegistration,
-                    Email = user.Email,
-                    Id = user.Id,
-                    MessageActivity = user.MessageActivity,
-                    Nickname = user.Nickname,
-                    AverageMessageCountInDay=user.AverageMessageCountInDay,
-                    LastMessageTime=user.LastMessageTime
-                };
+                return mapper.Map<UserDTO>(user);
         }
 
         public UserDTO AddNewUser(UserDTO userDTO)
@@ -448,17 +399,7 @@ namespace OneChat.BLL.Services
             Database.Save();
 
 
-            return new UserDTO
-            {
-                Id = user.Id,
-                Chats = user.Chats,
-                DateOfRegistration = user.DateOfRegistration,
-                Email = user.Email,
-                MessageActivity = user.MessageActivity,
-                Nickname = user.Nickname,
-                AverageMessageCountInDay=user.AverageMessageCountInDay,
-                LastMessageTime=user.LastMessageTime
-            };
+            return mapper.Map<UserDTO>(user);
         }
 
         public void AddUserToChat(int userId, int chatId)
@@ -497,7 +438,6 @@ namespace OneChat.BLL.Services
 
         public Dictionary<UserDTO, int> AllAnotherUsers(int chatId)
         {
-            var mapper = new MapperConfiguration(cfg => cfg.CreateMap<User, UserDTO>()).CreateMapper();
             Dictionary<User, int> users = new();
 
             var chats = Database.Chats.GetAll();
@@ -527,14 +467,7 @@ namespace OneChat.BLL.Services
                 if (fullChat == null)
                     return null;
 
-                chatsDTO.Add(new()
-                {
-                    ChatMessages = chat.ChatMessages,
-                    ChatName = chat.ChatName,
-                    ChatUsers = fullChat.ChatUsers,
-                    AdminId = chat.AdminId,
-                    Id = chat.Id
-                });
+                chatsDTO.Add(mapper.Map<ChatDTO>(chat));
             }
             return chatsDTO;
         }
@@ -543,17 +476,7 @@ namespace OneChat.BLL.Services
         {
             if (messageDTO != null)
             {
-                ChatMessage message = new()
-                {
-                    Id = messageDTO.Id,
-                    IsOld = messageDTO.isOld,
-                    ChatId = messageDTO.ChatId,
-                    Message = messageDTO.Message,
-                    SenderId = messageDTO.SenderId,
-                    Nickname = messageDTO.Nickname,
-                    ChatName = messageDTO.ChatName,
-                    TimeOfPosting = messageDTO.TimeOfPosting
-                };
+                ChatMessage message = mapper.Map<ChatMessage>(messageDTO);
                 Database.ChatMessages.Create(message);
                 UpdateUserLastMessageTime(messageDTO.SenderId, messageDTO.TimeOfPosting);
                 SaveMessageToQueue(messageDTO);
@@ -571,14 +494,7 @@ namespace OneChat.BLL.Services
         {
             if (messageDTO != null)
             {
-                ChatMessageFIFO message = new()
-                {
-                    Id = messageDTO.Id,
-                    ChatId = messageDTO.ChatId,
-                    Message = messageDTO.Message,
-                    Nickname = messageDTO.Nickname,
-                    ChatName = messageDTO.ChatName,
-                };
+                ChatMessageFIFO message = mapper.Map<ChatMessageFIFO>(messageDTO);
                 Database.ChatMessagesFIFO.Create(message);
                 Database.Save();
             }
@@ -628,25 +544,12 @@ namespace OneChat.BLL.Services
         {
             if (chatDTO == null)
                 return null;
-            Chat chat = new()
-            {
-                AdminId = chatDTO.AdminId,
-                ChatName = chatDTO.ChatName,
-                ChatUsers = chatDTO.ChatUsers,
-                ChatMessages = chatDTO.ChatMessages
-            };
+            Chat chat = mapper.Map<Chat>(chatDTO);
 
             Database.Chats.Create(chat);
             Database.Save();
 
-            return new ChatDTO
-            {
-                Id = chat.Id,
-                AdminId = chat.AdminId,
-                ChatName = chat.ChatName,
-                ChatUsers = chat.ChatUsers,
-                ChatMessages = chat.ChatMessages,
-            };
+            return mapper.Map<ChatDTO>(chat);
         }
 
         public void RemoveChat(int chatId)
@@ -667,19 +570,13 @@ namespace OneChat.BLL.Services
             var chatMessage = chatMessages.FirstOrDefault(x => x.Id == mesId);
             if (chatMessage == null)
                 return null;
-            return new()
-            {
-                Id = chatMessage.Id,
-                isOld = chatMessage.IsOld,
-                ChatId = chatMessage.ChatId,
-                Message = chatMessage.Message,
-                ChatName = chatMessage.ChatName,
-                SenderId = chatMessage.SenderId,
-                Nickname = chatMessage.Nickname,
-                TimeOfPosting = chatMessage.TimeOfPosting
-            };
+            return mapper.Map<ChatMessageDTO>(chatMessage);
         }
-
+        /// <summary>
+        /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// </summary>
+        /// <param name="chatId"></param>
+        /// <returns></returns>
         private List<ChatMessage> GetMessagesCheckOld(int chatId)
         {
             var chatMessages = Database.ChatMessages.GetAll();
@@ -725,19 +622,7 @@ namespace OneChat.BLL.Services
             User user = Database.Users.Get(userId);
             if (user == null)
                 return null;
-
-            return new UserDTO
-            {
-                Id = user.Id,
-                Email = user.Email,
-                Nickname = user.Nickname,
-                Password = user.Password,
-                MessageActivity = user.MessageActivity,
-                DateOfRegistration = user.DateOfRegistration,
-                AverageMessageCountInDay=user.AverageMessageCountInDay,
-                LastMessageTime=user.LastMessageTime,
-                Chats=user.Chats
-            };
+            return mapper.Map<UserDTO>(user);
         }
 
         public ChatDTO GetChat(int chatId)
@@ -745,7 +630,7 @@ namespace OneChat.BLL.Services
             Chat chat = Database.Chats.Get(chatId);
             if (chat == null)
                 return null;
-            return new ChatDTO { AdminId = chat.AdminId, ChatName = chat.ChatName, Id = chat.Id };
+            return mapper.Map<ChatDTO>(chat);
         }
 
         public void UpdateUser(UserDTO userDTO)
